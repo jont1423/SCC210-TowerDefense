@@ -8,6 +8,7 @@ public class Level {
 		
 		this.ID = ID;
 		this.currRound = currRound;
+		System.out.println(ID+currRound);
 	}
 	
 	public void advLvl(int adv){
