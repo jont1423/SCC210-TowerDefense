@@ -14,6 +14,7 @@ public class Save {
 	public void setDiff(String diff){
 	
 		this.diff = diff;
+		saveFile(currLvl, currRound, diff);
 	}
 	
 	public void newGame(String diff){
@@ -27,6 +28,7 @@ public class Save {
 		
 	}
 	
+	//Load the save and continue the game from the previous level and round
 	public void contGame(){
 		
 		readFile();
@@ -35,7 +37,7 @@ public class Save {
 		
 	}
 	
-	public void nextLvl(int currLvl, int currRound, String diff){
+	public void saveFile(int currLvl, int currRound, String diff){
 	
 		try{
 			
