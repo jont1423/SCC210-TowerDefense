@@ -33,6 +33,13 @@ public class Save {
 		
 		readFile();
 		
+		if ((currLvl < 1) || (currRound < 1) || (diff.isEmpty())){
+			System.out.println("Corrupt save file - save reset");
+			currLvl = 1;
+			currRound = 1;
+			diff.equals("easy");
+		}
+		
 		Level l = new Level(currLvl, currRound, diff);
 		
 	}
