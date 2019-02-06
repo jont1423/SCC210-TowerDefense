@@ -11,12 +11,14 @@ public class Save {
 		
 	}
 	
+	//Change the difficulty
 	public void setDiff(String diff){
 	
 		this.diff = diff;
 		saveFile(currLvl, currRound, diff);
 	}
 	
+	//Start a new game
 	public void newGame(String diff){
 		
 		currLvl = 1;
