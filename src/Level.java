@@ -1,9 +1,9 @@
 public class Level extends Save{
 	
-	private int ID;
-	private int rounds;
-	private int currRound;
-	private String diff;
+	private int ID;	//The current level ID 
+	private int rounds;	//The total rounds of the current level
+	private int currRound;	//Current round
+	private String diff;	//Difficulty
 	
 	public Level (int ID, int currRound, String diff){
 		
@@ -23,24 +23,27 @@ public class Level extends Save{
 			rounds = ID *4;
 		}
 		
-		advRound(1);
+		//advRound(1);//method call when round is completed
 	}
 	
+	//Advance to the next round, int adv is the amount to advance by
 	public void advRound(int adv){
 		
 		if(currRound < rounds){
 			currRound = currRound + adv;
 			saveFile(ID, currRound, diff);
 		}else{
-			roundFinish();
+			levelFinish();
 		}
 	}
 	
-	public void roundFinish(){
+	//Method called at the end of the level to save the game, terminate the current instance of Level after this is called
+	public void levelFinish(){
 		saveFile(ID+1, 1, diff);
 	}
 	
+	//Player loses, restart level from round 1
 	public void gameOver(){
-		
+		saveFile(ID, 1, diff);
 	}
 }
