@@ -34,7 +34,7 @@ public class Save {
 		readFile();
 		
 		if ((currLvl < 1) || (currRound < 1) || (diff.isEmpty())){
-			System.out.println("Corrupt save file - save reset");
+			System.out.println("Corrupt save file - new save reset");
 			currLvl = 1;
 			currRound = 1;
 			diff.equals("easy");
@@ -44,6 +44,7 @@ public class Save {
 		
 	}
 	
+	//Saves the current values to the .txt file
 	public void saveFile(int currLvl, int currRound, String diff){
 	
 		try{
@@ -62,6 +63,7 @@ public class Save {
 	
 	}
 	
+	//Reads the values from the save.txt file and updates the local variables
 	private void readFile(){
 	
 		try{
