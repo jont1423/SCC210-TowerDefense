@@ -5,6 +5,7 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.function.*;
+import java.lang.Math;
 
 import org.jsfml.system.*;
 import org.jsfml.window.*;
@@ -91,6 +92,9 @@ class Pathing {
 	
 	private abstract class ImageActor extends Actor {
 		private Sprite img;
+		float scalingX;
+		float scalingY;
+
 		public ImageActor(float x, float y, int r, String textureFile) {
 			//
 			// Load image/ texture
@@ -133,30 +137,34 @@ class Pathing {
 	
 	private class NPC extends ImageActor //This consists of both Enemies and Friendlies enemy.java is redundant???
 	{
-		private String ID;
+		private String ID; 		//dx and dy dependent on enemyID
 		private int health;
 		private int armour;
 		private int fireRate; //No of seconds until the next action can be performed
 		private Image iBackground;
 		private Background background;
 		private int[] direction = new int[] {0,0,0,0}; //Compass clockwise
-		private float highest = 0;
-		private float lowest = 500; //Not best way to determine a number
+		private int[] directionDistance = new int[] {0,0,0,0}; //Compass clockwise
+		private int[] oldDirectionDistance = new int[] {0,0,0,0}; //Compass clockwise
+		private float highest = 0; //Highest distance from NPC
+		private float lowest = 5000; //Lowest distance from NPC
 		private String tempCompass = " ";
 		private String compass = " ";
-		//dx and dy dependent on enemyID
+		private boolean firstLoop = false;
+		//private boolean intersectionCollision = false;
 
-		
 		//Database will be used to retrieve ID, health and armour
 		
 		NPC(String ID,float xPixelsPerSecond, float yPixelsPerSecond,int r, String textureFile, Background background)
 		{
+	
 			super(background.getStartingX(),background.getStartingY(),r,textureFile);
 			super.setDx(xPixelsPerSecond);
 			super.setDy(yPixelsPerSecond);
 			this.iBackground = background.getBackground();
 			this.background = background;
 			this.ID = ID;
+			System.out.println("ScalingY: "+scalingY);
 		}
 		//Cant put into actor its too generic
 		/*place() -- In actor
@@ -178,121 +186,89 @@ class Pathing {
 			//Cooldown/fire rate
 			cooldownTimer == fireRate
 		}	*/
-		void calcMove(int minx, int miny, int maxx, int maxy,float time) //Implemented by sub-classes using calcMove
+		void calcMove(int minx, int miny, int maxx, int maxy,float time)
 		{
-			//System.out.println());
-			if(direction[2]==1)
-			{
-				y += dy*time;
-				highest-= dy*time;
-				//To ensure lowest distance remains the same throughout - solves the issue dx/dy being too high
-				if(highest-(dx*time)<lowest)
-				{
-					y += (highest-lowest)*time;
-					highest = lowest;
-				}
-		
-			}
-			else if(direction[0] == 1)
-			{
-				y -= dy*time;
-				highest-= dy*time;
-				//To ensure lowest distance remains the same throughout
-				if(highest-(dx*time)<lowest)
-				{
-					y -= (highest-lowest)*time;
-					highest = lowest;
-				}
-	
-			}
-			if(direction[3] ==1)
-			{
-				//x -= dx;
-				//pixelsPerSecond * secondsElapseSinceLastFrame
-				x -= dx*time;
-				//System.out.println("X: " + x);
-				highest-= dx*time;
-				//To ensure lowest distance remains the same throughout
-				if(highest-(dx*time)<lowest)
-				{
-					//x -= (highest-lowest);
-					x -= (highest-lowest)*time;
-						//System.out.println("X: " + x);
-					highest = lowest;
-				}
-		
-			}
-			else if(direction[1] == 1)
-			{
-				x += dx*time;
-				//x += dx;
-				highest-= dx*time;
-				//To ensure lowest distance remains the same throughout
-				if(highest-(dx*time)<lowest)
-				{
-					//x += (highest-lowest);
-					x += (highest-lowest)*time;
-					highest = lowest;
-				}
-			
-			}
-	
 			pathCheck();
-
+			if(highest-(dx*time)<lowest)
+			{
+				//To ensure lowest distance remains the same throughout - solves the issue dx/dy being too high
+				if(direction[2]==1) y += (highest-lowest);
+				else if(direction[0] == 1) y -= (highest-lowest);
+				else if(direction[3] ==1) x -= (highest-lowest);
+				else if(direction[1] == 1) x += (highest-lowest);
+				highest = lowest;
+			}
+			else
+			{
+				if(direction[2]==1)	y += dy*time;
+				else if(direction[0] == 1) y -= dy*time;
+				else if(direction[3] ==1) x -= dx*time;
+				else if(direction[1] == 1) x += dx*time;
+				highest-= dy*time;
+			}
 		}
+
 		void pathCheck() //Implemented by sub classes
 		{
 				//Hard-code values need to be changed for any map
 				Color borderColour = background.getBorderColour();
 				Color borderIntersection = background.getIntersectionColour();
 				int accuracy = background.getAccuracy(); //How similar the colours colours are
-				Color pixelColour = iBackground.getPixel((int)x,(int)y);
-				System.out.println("ID: " + ID +"X: " + x + "Y " + y + "Colour: " + iBackground.getPixel((int)x,(int)y));
-
+				System.out.println("X: " + x + "Y " + y + "Colour: " + iBackground.getPixel((int)x,(int)y));
 				System.out.println("highest: " +highest);
-				System.out.println("lowest: " +lowest);
-				//Probably make this into a method since code is very similar
+				System.out.println("lowest: " +lowest);			
+				
+				//Calculates the distances to determine the new direction
 				if(highest<=lowest)
 				{
 					//Works out direction
+					firstLoop = true;
 					calculateDistance("left","right",borderColour,borderIntersection,accuracy);
 					calculateDistance("right","left",borderColour,borderIntersection,accuracy);
 					calculateDistance("up","down",borderColour,borderIntersection,accuracy);
 					calculateDistance("down","up",borderColour,borderIntersection,accuracy);
+					oldDirectionDistance[0] = directionDistance[0];
+					oldDirectionDistance[1] = directionDistance[1];
+					oldDirectionDistance[2] = directionDistance[2];
+					oldDirectionDistance[3] = directionDistance[3];
 					compass = tempCompass;
-					System.out.println("Compass: " + compass);
-					
-					if(compass.equals("left"))
-					{
-						direction[0] = 0;
-						direction[1] = 0;
-						direction[2] = 0;
-						direction[3] = 1;
-					}
-					else if(compass.equals("right"))
-					{
-						direction[0] = 0;
-						direction[1] = 1;
-						direction[2] = 0;
-						direction[3] = 0;
-					}
-					else if(compass.equals("up"))
-					{
-						direction[0] = 1;
-						direction[1] = 0;
-						direction[2] = 0;
-						direction[3] = 0;
-					}
-					else if(compass.equals("down"))
-					{
-						direction[0] = 0;
-						direction[1] = 0;
-						direction[2] = 1;
-						direction[3] = 0;
-					}
-				}
-					
 
+					System.out.println("Compass: " + compass);
+					System.out.println("Highest: " + highest);
+					
+					//Use for loops, maybe a function???
+					for(int i=0;i<direction.length;i++)
+					{
+						direction[i] = 0;
+					}
+					if(compass.equals("left")) direction[3] = 1;
+					else if(compass.equals("right")) direction[1] = 1;
+					else if(compass.equals("up")) direction[0] = 1;
+					else if(compass.equals("down"))	direction[2] = 1;
+
+					firstLoop=false;
+				}//Constantly checks distance of the 2 closest sides until one side changes and then it reevaulates the lowest distance
+				else
+				{
+					calculateDistance("left","right",borderColour,borderIntersection,accuracy);
+					calculateDistance("right","left",borderColour,borderIntersection,accuracy);
+					calculateDistance("up","down",borderColour,borderIntersection,accuracy);
+					calculateDistance("down","up",borderColour,borderIntersection,accuracy);
+
+					//lowest = side that doesnt change distance
+					if(compass.equals("up") || compass.equals("down"))
+					{
+						changeLowest(3,1,false);
+						changeLowest(1,3,false);
+
+					}
+					if(compass.equals("left") || compass.equals("right"))
+					{
+						changeLowest(0,2,true);
+						changeLowest(2,0,true);
+					}
+					
+				}
 		}
 		//returns true if colours are similar
 		boolean isSimilar(Color colour1, Color colour2, int accuracy)
@@ -303,46 +279,88 @@ class Pathing {
 			return true;
 		}
 		
-		void calculateDistance(String direction1,String oppositeDirection, Color borderColour, Color borderIntersection, int accuracy)
+		void changeLowest(int compassOne, int compassTwo,boolean multiply)
+		{
+			float tempLowest;
+			float tempLowest2;
+			if(!multiply)
+			{
+				tempLowest = directionDistance[compassTwo]/1.33f;
+				tempLowest2 = directionDistance[compassOne]/1.33f;
+			}
+			else
+			{
+				tempLowest = directionDistance[compassTwo]*1.33f;
+				tempLowest2 = directionDistance[compassOne]*1.33f;
+			}
+			if(oldDirectionDistance[compassOne] != directionDistance[compassOne])
+			{
+				if(directionDistance[compassTwo]<directionDistance[compassOne])lowest = tempLowest;
+				if(directionDistance[compassOne]<directionDistance[compassTwo])lowest = tempLowest2;
+				oldDirectionDistance[compassOne] = directionDistance[compassOne];
+				System.out.println("LowestShouldBe: "+ lowest);
+			}
+		}
+		
+		int calculateDistance(String direction1,String oppositeDirection, Color borderColour, Color borderIntersection, int accuracy)
 		{
 			int distance = 0;
 			boolean collision = false;
 			while(!collision)
 			{
-				//if(direction+-distance is > screenHeight ||screenWidth || <0)
 				if(direction1.equals("left") && x-distance<=0) break;
 				if(direction1.equals("right")&& x+distance>=screenWidth) break;
 				if(direction1.equals("up")&& y-distance<=0) break;	
 				if(direction1.equals("down")&& y+distance>=screenHeight) break;
 				
-				
-				boolean intersectionCollision = false;
-				if(direction1.equals("left"))intersectionCollision = isSimilar(iBackground.getPixel((int)x-distance,(int)y),borderIntersection,accuracy);
-				if(direction1.equals("right"))intersectionCollision = isSimilar(iBackground.getPixel((int)x+distance,(int)y),borderIntersection,accuracy);
-				if(direction1.equals("up"))intersectionCollision = isSimilar(iBackground.getPixel((int)x,(int)y-distance),borderIntersection,accuracy);
-				if(direction1.equals("down"))intersectionCollision = isSimilar(iBackground.getPixel((int)x,(int)y+distance),borderIntersection,accuracy);
+				/*boolean intersectionCollision = false;
+				if(direction1.equals("left"))intersectionCollision = isSimilar(iBackground.getPixel((int)Math.round(x-distance),(int)Math.round(y)),borderIntersection,accuracy);
 				if(intersectionCollision)
 				{
-					distance+=80;
+					//Always distance between intersectionColours * stretchX/Y
+					distance+=45*scalingX;
 					continue;
 				}
-				
-				if(direction1.equals("left"))collision = isSimilar(iBackground.getPixel((int)x-distance,(int)y),borderColour,accuracy);
-				if(direction1.equals("right"))collision = isSimilar(iBackground.getPixel((int)x+distance,(int)y),borderColour,accuracy);
-				if(direction1.equals("up"))collision = isSimilar(iBackground.getPixel((int)x,(int)y-distance),borderColour,accuracy);
-				if(direction1.equals("down"))collision = isSimilar(iBackground.getPixel((int)x,(int)y+distance),borderColour,accuracy);
+				if(direction1.equals("right"))intersectionCollision = isSimilar(iBackground.getPixel((int)Math.round(x+distance),(int)Math.round(y)),borderIntersection,accuracy);
+				if(intersectionCollision)
+				{
+					distance+=45*scalingX;
+					continue;
+				}
+				if(direction1.equals("up"))intersectionCollision = isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y-distance)),borderIntersection,accuracy);
+				if(intersectionCollision)
+				{
+					distance+=35*scalingY;
+					continue;
+				}
+				if(direction1.equals("down"))intersectionCollision = isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y+distance)),borderIntersection,accuracy);
+				if(intersectionCollision)
+				{
+					distance+=35*scalingY;
+					continue;
+				}*/
+
+				if(direction1.equals("left"))collision = isSimilar(iBackground.getPixel((int)Math.round(x-distance),(int)Math.round(y)),borderColour,accuracy);
+				if(direction1.equals("right"))collision = isSimilar(iBackground.getPixel((int)Math.round(x+distance),(int)Math.round(y)),borderColour,accuracy);
+				if(direction1.equals("up"))collision = isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y-distance)),borderColour,accuracy);
+				if(direction1.equals("down"))collision = isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y+distance)),borderColour,accuracy);
 				distance++;
 			}
+			if(direction1.equals("left")) directionDistance[3]=distance;
+			if(direction1.equals("right")) directionDistance[1]=distance;
+			if(direction1.equals("up")) directionDistance[0]=distance;
+			if(direction1.equals("down")) directionDistance[2]=distance;
 			System.out.println("direction: " + direction1+ "distance: " + distance);
 		
 			if(distance>highest && !compass.equals(oppositeDirection))  //Current direction is not oppositeSide
 			{
 				tempCompass = direction1;
-				highest = distance;
+				//NEED AN IF STATEMENT FOR THIS (can be executed unless highest<=lowest, which its not at the start)
+				if(firstLoop)highest = distance;
 			}
-			if(distance<lowest  && !(distance<0))lowest = distance;
+			if(distance<lowest  && !(distance<0) && compass.equals(" "))lowest = distance;
+			return distance;
 		}
-		//Other specialised methods in subclasses - classActions
 	}
 	
 	public class Background extends ImageActor
@@ -354,6 +372,7 @@ class Pathing {
 		int accuracy; // How similar should the colours be
 		
 		Image background = new Image();
+	
 		
 		Background(float x, float y, int r, String textureFile, IntRect startingArea, Color borderColor, Color intersectionColor, int accuracy)
 		{
@@ -374,6 +393,12 @@ class Pathing {
 			this.borderColor = borderColor;
 			this.intersectionColor = intersectionColor;
 			this.accuracy = accuracy;
+			System.out.println("BackgroundSizeX: " + background.getSize().x);
+			System.out.println("BackgroundSizeY: " + background.getSize().y);
+		
+	
+			scalingX = (background.getSize().x / 512f);
+			scalingY = (background.getSize().y / 512f);
 		}
 		
 		void calcMove(int minx, int miny, int maxx, int maxy, float time)
@@ -437,13 +462,14 @@ class Pathing {
 		//
 		// Create some actors
 		//
-		//OriginX,OriginY,Rotation,filename,StartingArea,BorderColor,IntersectionColor- What about accuracy????
-		Background background1 = new Background(512,384,0, backgroundImage,new IntRect(129,53,174,63),new Color(125,0,18),new Color(118,63,140),20);
-		actors.add(background1);
+		//OriginX,OriginY,Rotation,filename,StartingArea,BorderColor,IntersectionColor,accuracy
+		Background background1 = new Background(512,384,0, backgroundImage,new IntRect(128,53,175,63),new Color(125,0,18),new Color(118,63,140),20);
+		//Background background1 = new Background(512,384,0, backgroundImage,new IntRect(50,95,73,132),new Color(239,4,161),new Color(255,255,255),20);
+		actors.add(background1);														//128,175 //50,95,73,132
 		Clock time = new Clock(); //Need to be done somewhere (as the game is running)
 		Clock frameTime = new Clock(); //Movement is independent of framerate
 		
-		//actors.add(new NPC(String.valueOf(enemyCount),33.5f,33.5f,0,ImageFile,background1));
+		//actors.add(new NPC(String.valueOf(enemyCount),268f,268f,0,ImageFile,background1));
 		// Main loop
 		//
 		while (window.isOpen( )) 
@@ -461,9 +487,9 @@ class Pathing {
 				actor.draw(window);						
 			}
 			//Enemies spawn every 5 or more milliseconds
-			if(enemyCount < 250 && time.getElapsedTime().asMilliseconds() > 50)
+			if(enemyCount < 250 && time.getElapsedTime().asMilliseconds() > 500)
 			{
-				actors.add(new NPC(String.valueOf(enemyCount),33.5f,33.5f,0,ImageFile,background1));
+				actors.add(new NPC(String.valueOf(enemyCount),268f,268f,0,ImageFile,background1));
 				enemyCount++;
 				time.restart();
 			}
@@ -488,10 +514,13 @@ class Pathing {
 	}
 }
 /* To do List 
+// Pathing now seems to work fine just need to deal with intersectionCollision
+// Using scaling to deal with the problem needs to make sure it works for all sides - Works for 1st corner but not subsequent corners
 // ***Bigger sprites obscure small sprites for visibility
 // *** Games lags due to large amount of enemies
 // Enemies not going the correct distance before changing direction e.g. enemy on right wall will go to the bottom
 // Program Items
+// ** Maybe try to return x and y to ints for simplicity
 // Need to make enemies pass through/under intersections - Hardcoded only works if line sizes stay the same and map size stays the same
 // ***Relies on border colour being in at least 3 directions
 // ***Equal distance should be a non-issue if enemys always starts close or at the edge of the screen
