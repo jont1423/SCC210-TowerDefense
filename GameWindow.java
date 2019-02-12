@@ -34,7 +34,7 @@ public class GameWindow {
 	private static String SoundFile = "BGM.wav";
 	private static String ButtonFile[] = {"playButton.png", "levelButton.png", "exitButton.png"};
 	private static ImageAct wallpaperIMG, ButtonsIMG[];
-	//private static GenSound BGM;
+	private static GenSound BGM, sound1;
 	private float buttonX = 50, buttonY = 0, adjustX, adjustY, mouseLocX, mouseLocY;
 	private static GenButton rect0, rect1, rect2;
 	private static Mouse mouseMov;
@@ -53,6 +53,7 @@ public class GameWindow {
 		void draw(RenderWindow w) {
 			w.draw(item);
 		}
+		
 	}
 	
 	public class ImageAct extends Actor {
@@ -100,87 +101,82 @@ public class GameWindow {
 			setPosition = rectangle :: setPosition;
 		}
 		
-		boolean setHover(Vector2f size) {
-			boolean onButton;
-			float value = size.x;
-			float y = size.y;
-			return value;
-		}
-		
-		void setCirColor(Color c, int opacity) {
+		public void setCirColor(Color c, int opacity) {
 			circle.setFillColor(new Color(c, opacity));
 		}
 		
-		void setRectColor(Color c, int opacity) {
+		public void setRectColor(Color c, int opacity) {
 			rectangle.setFillColor(new Color(c, opacity));
 		}
 		
-		Transform getCirCurrentDimension() {
+		public Transform getCirTransformedDimension() {
 			Transform value = circle.getInverseTransform();
 			return value;
 		}
 		
-		Transform getRectCurrentDimension() {
+		public Transform getRectTransformedDimension() {
 			Transform value = rectangle.getInverseTransform();
 			return value;
 		}
 		
-		float getCirRadius() {
+		public float getCirRadius() {
 			float value = circle.getRadius();
 			return value;
 		}
 		
-		Vector2f getRectDimensions() {
+		public Vector2f getRectDimensions() {
 			Vector2f value = rectangle.getSize();
 			return value;
 		}
 		
-		float getCirPositionX() {
-			float value = circle.getPosition().x;
+		public Vector2f getCirPosition() {
+			Vector2f value = circle.getPosition();
 			return value;
 		}
 		
-		float getCirPositionY() {
-			float value = circle.getPosition().y;
+		public Vector2f getRectPosition() {
+			Vector2f value = rectangle.getPosition();
 			return value;
 		}
 		
-		float getRectPositionX() {
-			float value = rectangle.getPosition().x;
-			return value;
-		}
-		
-		float getRectPositionY() {
-			float value = rectangle.getPosition().y;
-			return value;
+		public boolean checkClick(Vector2f position, Vector2f dimension) {
+			boolean onButton = false;
+			if (mouseLocX >= position.x && mouseLocX <= (position.x + dimension.x) && mouseLocY >= position.y && mouseLocY <= (position.y + dimension.y))
+				onButton = true;
+			return onButton;
 		}
 	}
 	
-	public class GenSound {
+	public class GenSound extends Actor {
 		private Music sound;
 		
 		public GenSound (String file) {
+			sound = new Music();
 			try {sound.openFromFile(Paths.get(file));}
 			catch (IOException e) {System.out.println("Couldn't open soundtrack.");}
+		}
+		void playSound() {
+			sound.play();
+		}
+		void stopSound() {
+			sound.stop();
+		}
+		void loop(boolean status) {
+			sound.setLoop(status);
 		}
 	}
 	
 	public void run () {
-		System.out.println(ButtonFile.length);
+		System.out.println("ButtonFile array length: " + ButtonFile.length);
 		
-		//
 		// Create a window
-		//
 		RenderWindow window = new RenderWindow();
 		window.create(new VideoMode(screenWidth, screenHeight), Title, WindowStyle.CLOSE);
 
-		window.setFramerateLimit(300); // Avoid excessive updates
+		window.setFramerateLimit(30); // Avoid excessive updates
 
-		//
 		// Create some actors
-		//
-		
-		//BGM = new GenSound(SoundFile);
+		BGM = new GenSound(SoundFile);
 		wallpaperIMG = new ImageAct(ImageFile);
 		ButtonsIMG = new ImageAct[ButtonFile.length];
 		for (int i=0; i<ButtonFile.length; i++)
@@ -199,10 +195,10 @@ public class GameWindow {
 		rect1.setLocation((float) 440, (float) 540);
 		rect2.setLocation((float) 475, (float) 632);
 		
-		
-		//
+		BGM.loop(true);
+		BGM.playSound();
+
 		// Main loop
-		//
 		while (window.isOpen()) {
 			// Clear the screen
 			window.clear(Color.WHITE);
@@ -214,37 +210,37 @@ public class GameWindow {
 			rect0.draw(window);
 			rect1.draw(window);
 			rect2.draw(window);
+			
 			// Update the display with any changes
 			window.display();
 		
 			mouseLocX = mouseMov.getPosition(window).x;
 			mouseLocY = mouseMov.getPosition(window).y;
-
-			//System.out.println(rect0.setHover(rect0.getRectDimensions()));
 		
-		//System.out.println(mouseMov.getPosition(window));
-		//System.out.println(rect0.getRectDimensions().x);
-		//System.out.println(rect0.getRectPositionX());
-		//System.out.println(rect0.getRectPositionY());
+			//System.out.println(mouseMov.getPosition(window));
+			//System.out.println(rect0.getRectDimensions().x);
+			//System.out.println(rect0.getRectPosition().x);
 
 			// Handle any events
 			for (Event event : window.pollEvents()) {
+				
 				if (event.type == Event.Type.CLOSED) {
 					// the user pressed the close button
 					window.close();
 				}
-			}
-			
-			for (Event event : window.pollEvents()) {
+				if (rect0.checkClick(rect0.getRectPosition(), rect0.getRectDimensions()) == true)
+					rect0.setRectColor(Color.MAGENTA, 40);
+				else {rect0.setRectColor(Color.TRANSPARENT, 0);}
+				
 				//float mouseLocX = mouseMov.getPosition(window).x;
 				//float mouseLocY = mouseMov.getPosition(window).y;
 				//if (mouseMov.getPosition(window).x >= 445 && mouseMov.getPosition(window).x <= 644 && mouseMov.getPosition(window).y >= 432 && mouseMov.getPosition(window).y <= 512) {
 				
-				if (mouseLocX >= 445 && mouseLocX <= 644 && mouseLocY >= 432 && mouseLocY <= 512) {
-					System.out.println("On playButton!");
-					rect0.setRectColor(Color.MAGENTA, 40);
-				}
-				else {rect0.setRectColor(Color.TRANSPARENT, 0);}
+				//if (mouseMov.isButtonPressed(Mouse.Button.LEFT) && mouseLocX >= 445 && mouseLocX <= 644 && mouseLocY >= 432 && mouseLocY <= 512) {
+					//System.out.println("On playButton!");
+					//rect0.setRectColor(Color.MAGENTA, 40);
+				//}
+				//else {rect0.setRectColor(Color.TRANSPARENT, 0);}
 				
 			}
 		}
