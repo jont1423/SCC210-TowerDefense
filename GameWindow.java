@@ -36,7 +36,7 @@ public class GameWindow {
 	private static ImageAct wallpaperIMG, ButtonsIMG[];
 	private static GenSound BGM, sound1;
 	private float buttonX = 50, buttonY = 0, adjustX, adjustY, mouseLocX, mouseLocY;
-	private static GenButton rect0, rect1, rect2;
+	private static GenButton rect[];
 	private static Mouse mouseMov;
 	
 	public abstract class Actor {
@@ -139,7 +139,7 @@ public class GameWindow {
 			return value;
 		}
 		
-		public boolean checkClick(Vector2f position, Vector2f dimension) {
+		public boolean detectPos(Vector2f position, Vector2f dimension) {
 			boolean onButton = false;
 			if (mouseLocX >= position.x && mouseLocX <= (position.x + dimension.x) && mouseLocY >= position.y && mouseLocY <= (position.y + dimension.y))
 				onButton = true;
@@ -179,6 +179,7 @@ public class GameWindow {
 		BGM = new GenSound(SoundFile);
 		wallpaperIMG = new ImageAct(ImageFile);
 		ButtonsIMG = new ImageAct[ButtonFile.length];
+		rect = new GenButton[ButtonFile.length];
 		for (int i=0; i<ButtonFile.length; i++)
 			ButtonsIMG[i] = new ImageAct(ButtonFile[i]);
 		
@@ -188,12 +189,12 @@ public class GameWindow {
 		adjustX = 0; adjustY = 100;
 		ButtonsIMG[2].setLocation(buttonX - adjustX, buttonY + adjustY);
 		
-		rect0 = new GenButton(199, 80, Color.TRANSPARENT, 0);
-		rect1 = new GenButton(215, 63, Color.TRANSPARENT, 0);
-		rect2 = new GenButton(140, 50, Color.TRANSPARENT, 0);
-		rect0.setLocation((float) 445, (float) 432);
-		rect1.setLocation((float) 440, (float) 540);
-		rect2.setLocation((float) 475, (float) 632);
+		rect[0] = new GenButton(199, 80, Color.MAGENTA, 0);
+		rect[1] = new GenButton(215, 63, Color.GREEN, 0);
+		rect[2] = new GenButton(140, 50, Color.YELLOW, 0);
+		rect[0].setLocation((float) 445, (float) 432);
+		rect[1].setLocation((float) 440, (float) 540);
+		rect[2].setLocation((float) 475, (float) 632);
 		
 		BGM.loop(true);
 		BGM.playSound();
@@ -203,13 +204,13 @@ public class GameWindow {
 			// Clear the screen
 			window.clear(Color.WHITE);
 			
+			//Space for sound/mute button
+			
 			wallpaperIMG.draw(window);
 			for (ImageAct buttonsIMG: ButtonsIMG)
 				buttonsIMG.draw(window);
-			
-			rect0.draw(window);
-			rect1.draw(window);
-			rect2.draw(window);
+			for (GenButton rects: rect)
+				rects.draw(window);
 			
 			// Update the display with any changes
 			window.display();
@@ -228,9 +229,25 @@ public class GameWindow {
 					// the user pressed the close button
 					window.close();
 				}
-				if (rect0.checkClick(rect0.getRectPosition(), rect0.getRectDimensions()) == true)
-					rect0.setRectColor(Color.MAGENTA, 40);
-				else {rect0.setRectColor(Color.TRANSPARENT, 0);}
+
+				if (rect[0].detectPos(rect[0].getRectPosition(), rect[0].getRectDimensions())) {
+					rect[0].setRectColor(Color.MAGENTA, 40);
+					if (event.type == Event.Type.MOUSE_BUTTON_RELEASED)
+						wallpaperIMG.draw(window);
+				}
+				else {rect[0].setRectColor(Color.TRANSPARENT, 0);}
+
+				if (rect[1].detectPos(rect[1].getRectPosition(), rect[1].getRectDimensions()))
+					rect[1].setRectColor(Color.GREEN, 40);
+				else {rect[1].setRectColor(Color.TRANSPARENT, 0);}
+
+				if (rect[2].detectPos(rect[2].getRectPosition(), rect[2].getRectDimensions())) {
+					rect[2].setRectColor(Color.YELLOW, 40);
+					//if (mouseMov.isButtonPressed(Mouse.Button.LEFT))
+					if (event.type == Event.Type.MOUSE_BUTTON_RELEASED)
+						window.close();
+				}	
+				else {rect[2].setRectColor(Color.TRANSPARENT, 0);}
 				
 				//float mouseLocX = mouseMov.getPosition(window).x;
 				//float mouseLocY = mouseMov.getPosition(window).y;
