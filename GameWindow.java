@@ -1,8 +1,10 @@
-//
-//	GameWindow Class
-//
-//	Author: Jordan Young
-//
+/**
+ *
+ * Class name: GameWindow
+ *
+ * Author: Jordan Young
+ *
+**/
 
 import java.io.File;
 import java.io.IOException;
@@ -30,141 +32,16 @@ public class GameWindow {
 	private static String JavaVersion = Runtime.class.getPackage().getImplementationVersion();
 				
 	private static String Title = "Tower Defense";
-	private static String ImageFile = "Wallpaper.png";
+	private static String ImageFile = "Image/Wallpaper.png";
 	private static String SoundFile = "BGM.wav";
-	private static String ButtonFile[] = {"playButton.png", "levelButton.png", "exitButton.png"};
+	private static String ButtonFile[] = {"Image/playButton.png", "Image/levelButton.png", "Image/exitButton.png"};
 	private static ImageAct wallpaperIMG, ButtonsIMG[];
 	private static GenSound BGM, sound1;
-	private float buttonX = 50, buttonY = 0, adjustX, adjustY, mouseLocX, mouseLocY;
+	private float buttonX = 50, buttonY = 0, adjustX, adjustY;
 	private static GenButton rect[];
 	private static Mouse mouseMov;
-	
-	public abstract class Actor {
-		Drawable item;
-		BiConsumer<Float, Float> setPosition;
-		float xPosition;
-		float yPosition;
-	
-		void setLocation (Float x, Float y) {
-			xPosition = x;
-			yPosition = y;
-			setPosition.accept((float) xPosition, (float) yPosition);
-		}
-		void draw(RenderWindow w) {
-			w.draw(item);
-		}
-		
-	}
-	
-	public class ImageAct extends Actor {
-		private Sprite image;
-		public ImageAct(String textureFile) {
-			Texture imgTexture = new Texture();
-			try {imgTexture.loadFromFile(Paths.get(textureFile));}
-			catch (IOException e) {System.out.println("Couldn't read image.");}
-			
-			imgTexture.setSmooth(true);
-			image = new Sprite(imgTexture);
-
-			//this.xPosition = x;
-			//this.yPosition = y;
-			
-			item = image;
-			setPosition = image :: setPosition;
-			//setPosition.accept(x, y);
-		}
-	}
-	
-	//GenButton class allow generating rectangular and circle buttons
-	public class GenButton extends Actor {
-		private CircleShape circle;
-		private RectangleShape rectangle;
-		private int radius;
-		
-		//Constructor for Circle Shape
-		public GenButton(int radius, Color c, int opacity) {
-			circle = new CircleShape(radius);
-			circle.setFillColor(new Color(c, opacity));
-			circle.setOrigin(radius, radius);
-			
-			item = circle;
-			setPosition = circle :: setPosition;
-		}
-		
-		//Constructor for Rectangle Shape
-		public GenButton(int x, int y, Color c, int opacity) {
-			rectangle = new RectangleShape(new Vector2f(x, y));
-			rectangle.setFillColor(new Color(c, opacity));
-			rectangle.setOrigin(0, 0);
-			
-			item = rectangle;
-			setPosition = rectangle :: setPosition;
-		}
-		
-		public void setCirColor(Color c, int opacity) {
-			circle.setFillColor(new Color(c, opacity));
-		}
-		
-		public void setRectColor(Color c, int opacity) {
-			rectangle.setFillColor(new Color(c, opacity));
-		}
-		
-		public Transform getCirTransformedDimension() {
-			Transform value = circle.getInverseTransform();
-			return value;
-		}
-		
-		public Transform getRectTransformedDimension() {
-			Transform value = rectangle.getInverseTransform();
-			return value;
-		}
-		
-		public float getCirRadius() {
-			float value = circle.getRadius();
-			return value;
-		}
-		
-		public Vector2f getRectDimensions() {
-			Vector2f value = rectangle.getSize();
-			return value;
-		}
-		
-		public Vector2f getCirPosition() {
-			Vector2f value = circle.getPosition();
-			return value;
-		}
-		
-		public Vector2f getRectPosition() {
-			Vector2f value = rectangle.getPosition();
-			return value;
-		}
-		
-		public boolean detectPos(Vector2f position, Vector2f dimension) {
-			boolean onButton = false;
-			if (mouseLocX >= position.x && mouseLocX <= (position.x + dimension.x) && mouseLocY >= position.y && mouseLocY <= (position.y + dimension.y))
-				onButton = true;
-			return onButton;
-		}
-	}
-	
-	public class GenSound extends Actor {
-		private Music sound;
-		
-		public GenSound (String file) {
-			sound = new Music();
-			try {sound.openFromFile(Paths.get(file));}
-			catch (IOException e) {System.out.println("Couldn't open soundtrack.");}
-		}
-		void playSound() {
-			sound.play();
-		}
-		void stopSound() {
-			sound.stop();
-		}
-		void loop(boolean status) {
-			sound.setLoop(status);
-		}
-	}
+	private static Vector2i mouseLoc;
+	private boolean mainMenuOn = false;
 	
 	public void run () {
 		System.out.println("ButtonFile array length: " + ButtonFile.length);
@@ -215,9 +92,8 @@ public class GameWindow {
 			// Update the display with any changes
 			window.display();
 		
-			mouseLocX = mouseMov.getPosition(window).x;
-			mouseLocY = mouseMov.getPosition(window).y;
-		
+			mouseLoc = mouseMov.getPosition(window);
+
 			//System.out.println(mouseMov.getPosition(window));
 			//System.out.println(rect0.getRectDimensions().x);
 			//System.out.println(rect0.getRectPosition().x);
@@ -229,36 +105,27 @@ public class GameWindow {
 					// the user pressed the close button
 					window.close();
 				}
-
-				if (rect[0].detectPos(rect[0].getRectPosition(), rect[0].getRectDimensions())) {
+				
+				if (rect[0].detectPos(rect[0].getRectPosition(), rect[0].getRectDimensions(), mouseLoc)) {
 					rect[0].setRectColor(Color.MAGENTA, 40);
-					if (event.type == Event.Type.MOUSE_BUTTON_RELEASED)
-						wallpaperIMG.draw(window);
+					if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+						ImageAct wallpaperIMG1 = new ImageAct("Image/Wallpaper1.jpg");
+						wallpaperIMG1.draw(window);
+					}
 				}
 				else {rect[0].setRectColor(Color.TRANSPARENT, 0);}
 
-				if (rect[1].detectPos(rect[1].getRectPosition(), rect[1].getRectDimensions()))
+				if (rect[1].detectPos(rect[1].getRectPosition(), rect[1].getRectDimensions(), mouseLoc))
 					rect[1].setRectColor(Color.GREEN, 40);
 				else {rect[1].setRectColor(Color.TRANSPARENT, 0);}
 
-				if (rect[2].detectPos(rect[2].getRectPosition(), rect[2].getRectDimensions())) {
+				if (rect[2].detectPos(rect[2].getRectPosition(), rect[2].getRectDimensions(), mouseLoc)) {
 					rect[2].setRectColor(Color.YELLOW, 40);
 					//if (mouseMov.isButtonPressed(Mouse.Button.LEFT))
 					if (event.type == Event.Type.MOUSE_BUTTON_RELEASED)
 						window.close();
 				}	
 				else {rect[2].setRectColor(Color.TRANSPARENT, 0);}
-				
-				//float mouseLocX = mouseMov.getPosition(window).x;
-				//float mouseLocY = mouseMov.getPosition(window).y;
-				//if (mouseMov.getPosition(window).x >= 445 && mouseMov.getPosition(window).x <= 644 && mouseMov.getPosition(window).y >= 432 && mouseMov.getPosition(window).y <= 512) {
-				
-				//if (mouseMov.isButtonPressed(Mouse.Button.LEFT) && mouseLocX >= 445 && mouseLocX <= 644 && mouseLocY >= 432 && mouseLocY <= 512) {
-					//System.out.println("On playButton!");
-					//rect0.setRectColor(Color.MAGENTA, 40);
-				//}
-				//else {rect0.setRectColor(Color.TRANSPARENT, 0);}
-				
 			}
 		}
 	}
