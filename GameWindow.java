@@ -6,41 +6,35 @@
  *
 **/
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.function.*;
-import java.io.InputStream;
+//import java.io.File;
+//mport java.io.IOException;
+//import java.nio.file.*;
+//import java.util.ArrayList;
+//import java.util.function.*;
+//import java.io.InputStream;
 
 import org.jsfml.system.*;
 import org.jsfml.window.*;
-import org.jsfml.audio.*;
+//import org.jsfml.audio.*;
 import org.jsfml.window.event.*;
 import org.jsfml.graphics.*;
-import org.jsfml.graphics.Image;
+//import org.jsfml.graphics.Image;
 
 public class GameWindow {
 	private static int screenWidth = 1024;
 	private static int screenHeight = 768;
-
-	//
-	// The Java install comes with a set of fonts but these will
-	// be on different filesystem paths depending on the version
-	// of Java and whether the JDK or JRE version is being used.
-	//
-	private static String JavaVersion = Runtime.class.getPackage().getImplementationVersion();
-				
+	
 	private static String Title = "Tower Defense";
 	private static String ImageFile = "Image/Wallpaper.png";
-	private static String SoundFile = "BGM.wav";
-	private static String ButtonFile[] = {"Image/playButton.png", "Image/levelButton.png", "Image/exitButton.png"};
+	private static String SoundFile = "Sounds/BGM.wav";
+	private static String ButtonFile[] = {"MenuButtons/playButton.png", "MenuButtons/levelButton.png", "MenuButtons/exitButton.png"};
 	private static ImageAct wallpaperIMG, ButtonsIMG[];
 	private static GenSound BGM, sound1;
-	private float buttonX = 50, buttonY = 0, adjustX, adjustY;
 	private static GenButton rect[];
 	private static Mouse mouseMov;
 	private static Vector2i mouseLoc;
+	
+	private float buttonX = 50, buttonY = 0, adjustX, adjustY;
 	private boolean mainMenuOn = false;
 	
 	public void run () {

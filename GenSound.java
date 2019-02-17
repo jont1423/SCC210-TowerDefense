@@ -5,21 +5,21 @@
  *
 **/
 
-import java.io.File;
+//import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.function.*;
-import java.io.InputStream;
+//import java.util.ArrayList;
+//import java.util.function.*;
+//import java.io.InputStream;
 
-import org.jsfml.system.*;
-import org.jsfml.window.*;
+//import org.jsfml.system.*;
+//import org.jsfml.window.*;
 import org.jsfml.audio.*;
-import org.jsfml.window.event.*;
-import org.jsfml.graphics.*;
-import org.jsfml.graphics.Image;
+//import org.jsfml.window.event.*;
+//import org.jsfml.graphics.*;
+//import org.jsfml.graphics.Image;
 
-public class GenSound extends Actor {
+public class GenSound{
 	private Music sound;
 		
 	public GenSound (String file) {
