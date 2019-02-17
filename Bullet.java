@@ -22,28 +22,71 @@ public class Bullet extends ImageActor
 		this.getImg().setRotation(rotation);
 		this.maxDistance = maxDistance;
 		this.velocity = velocity;
+		super.setDx(velocity);
+		super.setDy(velocity);
 
 		//Calculate distance to target move to target and delete on impact
 	}
-
+	
+	float calcDistanceX() {
+		if(enemy==null) return 0;
+		return this.x - enemy.x;
+	}
+	
+	float calcDistanceY() {
+		if(enemy==null) return 0;
+		return this.y - enemy.y;
+	}
+	
 	void setTarget(NPC enemy) {
 		this.enemy = enemy;
 	}
 	
-	void calculateDistanceToTarget()
+	void checkProximity()
+	{
+		//Remove bullet
+		boolean check = ((this.x > enemy.x-10) && (this.x < enemy.x+10) && (this.y > enemy.y-10) && (this.y < enemy.y+10) && enemy!=null );  
+		//System.out.println("Statement "+ check);  
+		if(check)
+		{	
+				System.out.println("Hit");
+				super.setDx(0);
+				super.setDy(0);
+				remove = true;
+				enemy.setHealth(5);
+		}
+	
+	}
+	
+	void calculateDistanceToTarget() //Might be able to implement anothter classes method
 	{
 		//Calculate distance
+		double xDiff = calcDistanceX();
+		double yDiff = calcDistanceY();
+		if(xDiff==0 || yDiff==0) 
+		{
+				super.setDx(0);
+				super.setDy(0);
+				remove = true;
+		}	
 		
+		float length = (float) Math.sqrt(xDiff*xDiff + yDiff*yDiff);
+		float fractionX = (float) xDiff/length;
+		float fractionY = (float) yDiff/length;
 		//Adjust dx and dy accordingly
-		
+		System.out.println("Dx: " + dx*fractionX + "Dy: " + dy*fractionY);
+		System.out.println("x: " + this.x + "y: " + this.y);
+		super.setDx(-dx*fractionX);
+		super.setDy(-dy*fractionY);
 		//Once it reaches target remove
+
 		
 	}
 
 	@Override
 	void calcMove(int minx, int miny, int maxx, int maxy, float time) {
-		x += dx;
-		y += dy;
+		x += dx*time;
+		y += dy*time;
 		//if(distanceToTarget<targetSize) removeBullet
 	}
 }

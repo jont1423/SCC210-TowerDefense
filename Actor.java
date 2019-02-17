@@ -1,16 +1,6 @@
-import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Random;
 import java.util.function.*;
-import java.lang.Math;
-
-import org.jsfml.system.*;
-import org.jsfml.window.*;
-import org.jsfml.window.event.*;
 import org.jsfml.graphics.*;
+
 abstract class Actor {
 		Drawable obj;
 		IntConsumer rotate;
@@ -21,6 +11,7 @@ abstract class Actor {
 		int r  = 0;	// Change in rotation per cycle
 		float dx = 0;	// Change in X-coordinate per cycle
 		float dy = 0;	// Change in Y-coordinate per cycle
+		boolean remove = false;
 
 		//
 		// Is point x, y within area occupied by this object?
@@ -49,6 +40,8 @@ abstract class Actor {
 		}
 		//Tower Method
 		boolean needsRemoving(int width, int height) {
+			if(remove)
+				return true;
 			if (x < 0 || x > width || y < 0 || y > height)
 				return true;
 			else

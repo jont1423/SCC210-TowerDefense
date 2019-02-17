@@ -1,16 +1,8 @@
-import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.function.*;
-import java.lang.Math;
-
 import org.jsfml.system.*;
-import org.jsfml.window.*;
-import org.jsfml.window.event.*;
 import org.jsfml.graphics.*;
+
 abstract class ImageActor extends Actor {
 		private Sprite img;
 		float scalingX;

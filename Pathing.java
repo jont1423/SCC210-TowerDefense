@@ -33,16 +33,17 @@ class Pathing {
 	private static int fontSize     = 48;
 	private static String FontFile  = "LucidaSansRegular.ttf";
 	private String FontPath;	// Where fonts were found
-	private static String ImageFile = "background2Scaled.png";
-	private static String Title   = "Tower Defence";
+	private static String Title   = "Constellation";
 	
 	private static String enemyFile[] = {"enemy.png","enemy2.png","enemy4.png"};
 	private static String towerFile[] = {"tower-1.png"};
+	private static String backgroundFile[] = {"Map1.png","Map2.png","Map3.png"};
 	private static Background background;
 	private ArrayList<NPC> npcs = new ArrayList<NPC>( );
 	private ArrayList<Tower> towers = new ArrayList<Tower>( );
 	//private ArrayList<List<Actor>> actors = new ArrayList<List<Actor>>( );
 	private ArrayList<Actor> actors = new ArrayList<Actor>( );
+	private ArrayList<Bullet> bullets = new ArrayList<Bullet>( );
 	//Maybe an actor one for just drawing???
 
 
@@ -73,21 +74,31 @@ class Pathing {
 				WindowStyle.DEFAULT,
 				settings);
 				
-		window.setFramerateLimit(10); // Avoid excessive updates
+		window.setFramerateLimit(60); // Avoid excessive updates
 
 		//
 		// Create some actors
+		
+		//All Maps
 		//OriginX,OriginY,Rotation,filename,StartingArea,BorderColor,IntersectionColor,accuracy
-		//Background background1 = new Background(512,384,0, ImageFile,new IntRect(128,53,175,63),new Color(125,0,18),new Color(118,63,140),20);
-		Background background1 = new Background(512,384,0, ImageFile,new IntRect(49,96,55,131),new Color(239,4,161),new Color(255,255,255),20);
-		actors.add(background1);														//128,175 //50,95,73,132
+		//Need to make sure the starting distance is 3 pixels away from either side
+		//Background map1 = new Background(512,384,0, backgroundFile[0],new IntRect(171,97,32,31),new Color(255,0,157),new Color(255,255,255),20);
+		Background map1 = new Background(512,384,0, backgroundFile[0],new IntRect(171,97,32,29),new Color(255,0,157),new Color(255,255,255),20);
+		//Background map2 = new Background(512,384,0, backgroundFile[1],new IntRect(231,48,32,32),new Color(124,0,20),new Color(126,57,140),20);
+		Background map2 = new Background(512,384,0, backgroundFile[1],new IntRect(231,48,28,32),new Color(124,0,20),new Color(126,57,140),20);
+		Background map3 = new Background(512,384,0, backgroundFile[2],new IntRect(800,122,19,31),new Color(172,49,49),new Color(255,255,255),20);
+		//Background map4 = new Background(512,384,0, ImageFile,new IntRect(49,96,55,131),new Color(239,4,161),new Color(255,255,255),20);
+		//Background map5 = new Background(512,384,0, ImageFile,new IntRect(49,96,55,131),new Color(239,4,161),new Color(255,255,255),20);
+		
+		actors.add(map1);														//128,175 //50,95,73,132
 		Clock time = new Clock(); //Need to be done somewhere (as the game is running)
 		Clock frameTime = new Clock(); //Movement is independent of framerate
+		Clock firerate = new Clock(); //Unique to each turret
 		
-		
-		npcs.add(new NPC("ID",100,50,134f,134f,0,"enemy2.png", background1));
+		npcs.add(new NPC("ID",50,0,134f,134f,0,"enemy2.png", map1));
 		actors.add(npcs.get(0));
-		Tower t = new Tower(screenWidth / 2, screenHeight / 2, 0, towerFile[0]); 
+
+		Tower t = new Tower(screenWidth / 2, screenHeight / 2, 0, towerFile[0],0); 
 		towers.add(t);
 		actors.add(t);
 		//
@@ -113,12 +124,29 @@ class Pathing {
 					if (currentDistance <= proximity && currentDistance < shortestDistance)
 					{
 						tower.setNearestEnemy(npc);
-						tower.calcBulletOrigin();
-						actors.add(new Bullet(tower.getBulletOriginX(),tower.getBulletOriginY(),0,"bullet.png",0,33.5f));
 					}	
+					if(npc.getHealth() < 0 ) actors.remove(npc);
 				}
 				
-				
+									
+				//If statement - Make sure it each turret has 1 bullet at a time, theres a target and checks its been 0.5 seconds since the last bullet was created
+				if(!actors.contains(tower.getBullet())&& tower.getNearestEnemy() != null && firerate.getElapsedTime().asMilliseconds()>500)
+				{
+					firerate.restart();
+					tower.calcBulletOrigin();
+					Bullet b = new Bullet(tower.getBulletOriginX(),tower.getBulletOriginY(),0,"bullet.png",0,500f);
+					b.setTarget(tower.getNearestEnemy());
+					actors.add(b);
+					bullets.add(b);
+					tower.setBullet(b);
+					b.calculateDistanceToTarget();
+				}
+			}
+			
+			for(Bullet bl : bullets)
+			{
+				//bl.calculateDistanceToTarget();
+				bl.checkProximity();
 			}
 
 			for (Actor actor : actors) {
@@ -136,7 +164,10 @@ class Pathing {
 			//Enemies spawn every .5  seconds
 			/*if(enemyCount < 250 && time.getElapsedTime().asMilliseconds() > 500)
 			{
-				actors.add(new SpeedDemon("SD",25,150,5f,134f,134f,0,"enemy4.png",background1));
+				Random r = new Random();
+				int random = r.nextInt(enemyFile.length);
+				npcs.add(new NPC("ID",50,0,134f,134f,0,enemyFile[random], map1));
+				actors.add(npcs.get(npcs.size()-1));
 				enemyCount++;
 				time.restart();
 			}*/
@@ -174,7 +205,7 @@ class Pathing {
 
 						if(actors.indexOf(t) !=-1) 
 						{
-							towers.add(new Tower((int) event.asMouseEvent().position.x, (int) event.asMouseEvent().position.y, 0, towerFile[0]));
+							towers.add(new Tower((int) event.asMouseEvent().position.x, (int) event.asMouseEvent().position.y, 0, towerFile[0],500));
 							actors.add(towers.get(towers.size()-1));
 						}
 						//if(!collision) actors.remove(b);
@@ -207,8 +238,11 @@ class Pathing {
 	}
 }
 /* To do List 
-//Towers - Make projectiles shoot enemies and do damage,avoid placing and rotating 
-// Pathing now seems to work fine just need to deal with intersectionCollision
+// NPC - Cant do intersection unless they are teleported to the other side
+// Towers - 
+// Items - Start this class and make them drop from enemies, including currency and powerups
+// Bullet - Bullet cant correctly go to target as they change direction
+// Pathing now seems to work fine just need to deal with intersectionCollision and making the start area smaller
 // Using scaling to deal with the problem needs to make sure it works for all sides - Works for 1st corner but not subsequent corners
 // ***Bigger sprites obscure small sprites for visibility
 // *** Games lags due to large amount of enemies

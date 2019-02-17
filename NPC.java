@@ -1,16 +1,5 @@
-import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.function.*;
-import java.lang.Math;
-
-import org.jsfml.system.*;
-import org.jsfml.window.*;
-import org.jsfml.window.event.*;
 import org.jsfml.graphics.*;
+
  class NPC extends ImageActor //This consists of both Enemies and Friendlies enemy.java is redundant???
 	{
 		private String ID; 		//dx and dy dependent on enemyID
@@ -28,6 +17,7 @@ import org.jsfml.graphics.*;
 		private boolean firstLoop = false;
 		private  int screenWidth  = 1024;
 		private  int screenHeight = 768;
+
 		//private boolean intersectionCollision = false;
 
 		//Database will be used to retrieve ID, health and armour
@@ -43,7 +33,6 @@ import org.jsfml.graphics.*;
 			this.ID = ID;
 			this.health = health;
 			this.armour = armour;
-			System.out.println("ScalingY: "+scalingY);
 		}
 		//Cant put into actor its too generic
 		/*place() -- In actor
@@ -51,17 +40,42 @@ import org.jsfml.graphics.*;
 			//Animaton functions in animation
 			//call to actor .add() in actor
 		}*/
-		/*die()
+		void die()
 		{
+			remove = true;
 			//Animation funcions in animation
 			//return (health <=0)
-			 --->In windows//Call to actor .remove() in actor
-		}*/
+			 //--->In windows//Call to actor .remove() in actor
+		}
+		
+		void setArmour(int damage)
+		{
+			//Need to calculate new damage
+			armour -= damage;
+		}
+		
+		void setHealth(int damage)
+		{
+			if(armour>0)
+			{
+				if(armour<damage) health -= (damage-armour);	
+				setArmour(damage);
+			}
+			else 
+			{
+				health -= damage;
+			}
+		}
+		
+		int getHealth()
+		{
+			return health;
+		}
 
 		void calcMove(int minx, int miny, int maxx, int maxy,float time)
 		{
 			pathCheck();
-			if(highest-(dx*time)<lowest)
+			if(highest-(dx*time)<lowest || highest-(dy*time)<lowest)
 			{
 				//To ensure lowest distance remains the same throughout - solves the issue dx/dy being too high
 				if(compass.equals("down")) y += (highest-lowest);
@@ -76,7 +90,9 @@ import org.jsfml.graphics.*;
 				else if(compass.equals("up")) y -= dy*time;
 				else if(compass.equals("left")) x -= dx*time;
 				else if(compass.equals("right")) x += dx*time;
-				highest-= dy*time;
+				
+				if(compass.equals("up") || compass.equals("down"))highest-= dy*time;
+				if(compass.equals("left") || compass.equals("right"))highest-= dx*time;
 			}
 		}
 
@@ -86,38 +102,19 @@ import org.jsfml.graphics.*;
 				Color borderColour = background.getBorderColour();
 				Color borderIntersection = background.getIntersectionColour();
 				int accuracy = background.getAccuracy(); //How similar the colours colours are
-				//System.out.println("X: " + x + "Y " + y + "Colour: " + iBackground.getPixel((int)x,(int)y));
-				//System.out.println("highest: " +highest);
-				//System.out.println("lowest: " +lowest);			
+				System.out.println("X: " + x + "Y " + y + "Colour: " + iBackground.getPixel((int)x,(int)y));
+				System.out.println("highest: " +highest);
+				System.out.println("lowest: " +lowest);			
 
-				//Need clearer maps
-				/*if(isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y)),borderIntersection,accuracy))
-				{
-					System.out.println("FNERUJNFERFNOUJEFNFNJ");
-					//Need a x and y lane width variable from background
-					if(compass.equals("left"))
-					{
-						x-= 45 * scalingY;
-						System.out.println("Left Here");
-					}
-					if(compass.equals("right"))
-					{				
-						x+= 45 * scalingY;
-						System.out.println("Right Here");
-					}
-					if(compass.equals("up")) y-= 40 * scalingX;
-					if(compass.equals("down")) y+= 40 * scalingX;
-					
-				}*/
 				//Calculates the distances to determine the new direction
 				if(highest<=lowest)
 				{
 					//Works out direction
 					firstLoop = true;
-					calculateDistance("left","right",borderColour,accuracy);
-					calculateDistance("right","left",borderColour,accuracy);
-					calculateDistance("up","down",borderColour,accuracy);
-					calculateDistance("down","up",borderColour,accuracy);
+					calculateDistance("left","right",borderColour,borderIntersection,accuracy);
+					calculateDistance("right","left",borderColour,borderIntersection,accuracy);
+					calculateDistance("up","down",borderColour,borderIntersection,accuracy);
+					calculateDistance("down","up",borderColour,borderIntersection,accuracy);
 					oldDirectionDistance[0] = directionDistance[0];
 					oldDirectionDistance[1] = directionDistance[1];
 					oldDirectionDistance[2] = directionDistance[2];
@@ -125,16 +122,16 @@ import org.jsfml.graphics.*;
 					compass = tempCompass;
 
 					System.out.println("Compass: " + compass);
-					System.out.println("Highest: " + highest);
+					//System.out.println("Highest: " + highest);
 
 					firstLoop=false;
 				}//Constantly checks distance of the 2 closest sides until one side changes and then it reevaulates the lowest distance
 				else
 				{
-					calculateDistance("left","right",borderColour,accuracy);
-					calculateDistance("right","left",borderColour,accuracy);
-					calculateDistance("up","down",borderColour,accuracy);
-					calculateDistance("down","up",borderColour,accuracy);
+					calculateDistance("left","right",borderColour,borderIntersection,accuracy);
+					calculateDistance("right","left",borderColour,borderIntersection,accuracy);
+					calculateDistance("up","down",borderColour,borderIntersection,accuracy);
+					calculateDistance("down","up",borderColour,borderIntersection,accuracy);
 
 					//lowest = side that doesnt change distance
 					if(compass.equals("up") || compass.equals("down"))
@@ -164,36 +161,65 @@ import org.jsfml.graphics.*;
 		{
 			float tempLowest;
 			float tempLowest2;
+			//Only applies to intersection paths
+			float difference = (highest-lowest);
 			if(!multiply)
 			{
-				tempLowest = directionDistance[compassTwo]/1.33f;
-				tempLowest2 = directionDistance[compassOne]/1.33f;
+				tempLowest = directionDistance[compassTwo]; //No Constant if pathWidthY/pathWidthX = 1
+				tempLowest2 = directionDistance[compassOne];
 			}
 			else
 			{
-				tempLowest = directionDistance[compassTwo]*1.33f;
-				tempLowest2 = directionDistance[compassOne]*1.33f;
+				tempLowest = directionDistance[compassTwo];
+				tempLowest2 = directionDistance[compassOne];
 			}
 			if(oldDirectionDistance[compassOne] != directionDistance[compassOne])
 			{
-				if(directionDistance[compassTwo]<directionDistance[compassOne])lowest = tempLowest;
-				if(directionDistance[compassOne]<directionDistance[compassTwo])lowest = tempLowest2;
+				if(directionDistance[compassTwo]<directionDistance[compassOne] && difference < 50)lowest = tempLowest;
+				if(directionDistance[compassOne]<directionDistance[compassTwo] && difference < 50)lowest = tempLowest2;
 				oldDirectionDistance[compassOne] = directionDistance[compassOne];
-				//System.out.println("LowestShouldBe: "+ lowest);
+				System.out.println("LowestShouldBe: "+ lowest);
 			}
 		}
 		
-		int calculateDistance(String direction1,String oppositeDirection, Color borderColour, int accuracy)
+		int calculateDistance(String direction1,String oppositeDirection, Color borderColour, Color borderIntersection, int accuracy)
 		{
 			int distance = 0;
 			boolean collision = false;
+			boolean intersection = false;
+			boolean end = false;
+			Color endColor = new Color(41,17,17);
 			while(!collision)
 			{
-				if(direction1.equals("left") && x-distance<=0) break;
-				if(direction1.equals("right")&& x+distance>=screenWidth) break;
-				if(direction1.equals("up")&& y-distance<=0) break;	
-				if(direction1.equals("down")&& y+distance>=screenHeight) break;
+				if(direction1.equals("left") && x-distance<=150) break; //THESE NUMBERS NEED TO BE SIZE OF THE MAP
+				if(direction1.equals("right") && x+distance>=855) break;
+				if(direction1.equals("up") && y-distance<=40) break;	
+				if(direction1.equals("down") && y+distance>=745) break;
+				//Dealing with intersection code
+				intersection = false;
+				if(direction1.equals("left"))intersection = isSimilar(iBackground.getPixel((int)Math.round(x-distance),(int)Math.round(y)),borderIntersection,accuracy);
+				if(direction1.equals("right"))intersection = isSimilar(iBackground.getPixel((int)Math.round(x+distance),(int)Math.round(y)),borderIntersection,accuracy);
+				if(direction1.equals("up"))intersection = isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y-distance)),borderIntersection,accuracy);
+				if(direction1.equals("down"))intersection = isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y+distance)),borderIntersection,accuracy);
+				if(intersection)
+				{
+					//Increase distance so ending point is correct
+					if(highest<=lowest)
+					{
+						highest += 64;
+					}
+					System.out.println("Intersection");
+					distance += 64;
+					continue;
+				}
+				//Dealing with exit code
+				end = isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y)),endColor,5);
+				if(end)
+				{
+					die();
+				}
 				
+				//Dealing with movement code
 				if(direction1.equals("left"))collision = isSimilar(iBackground.getPixel((int)Math.round(x-distance),(int)Math.round(y)),borderColour,accuracy);
 				if(direction1.equals("right"))collision = isSimilar(iBackground.getPixel((int)Math.round(x+distance),(int)Math.round(y)),borderColour,accuracy);
 				if(direction1.equals("up"))collision = isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y-distance)),borderColour,accuracy);
@@ -204,7 +230,7 @@ import org.jsfml.graphics.*;
 			if(direction1.equals("right")) directionDistance[1]=distance;
 			if(direction1.equals("up")) directionDistance[0]=distance;
 			if(direction1.equals("down")) directionDistance[2]=distance;
-		//	System.out.println("direction: " + direction1+ "distance: " + distance);
+			System.out.println("direction: " + direction1+ "distance: " + distance);
 		
 			if(distance>highest && !compass.equals(oppositeDirection))  //Current direction is not oppositeSide
 			{

@@ -1,15 +1,8 @@
-import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
-import java.nio.file.*;
-import java.util.ArrayList;
 import java.util.Random;
-import java.util.function.*;
 import java.lang.Math;
 
-import org.jsfml.system.*;
-import org.jsfml.window.*;
-import org.jsfml.window.event.*;
 import org.jsfml.graphics.*;
 public class Background extends ImageActor
 	{
@@ -17,6 +10,7 @@ public class Background extends ImageActor
 		IntRect startingArea; //Area that enemy sprites can spawn
 		Color borderColor; //Color of the border
 		Color intersectionColor; //Color of the intersection
+		Color endColor; //Color of the intersection
 		int accuracy; // How similar should the colours be
 		
 		Image background = new Image();
@@ -56,12 +50,12 @@ public class Background extends ImageActor
 		public int getStartingX()
 		{
 			Random r = new Random();
-			return r.nextInt((startingArea.width - startingArea.left)+1)+startingArea.left;
+			return r.nextInt(startingArea.width) + startingArea.left;
 		}
 		public int getStartingY()
 		{
 			Random r = new Random();
-			return r.nextInt((startingArea.height - startingArea.top)+1)+startingArea.top;
+			return r.nextInt(startingArea.height)+startingArea.top;
 		}
 			
 		public Image getBackground()
