@@ -33,12 +33,27 @@ public class GameWindow {
 	private static GenButton rect[];
 	private static Mouse mouseMov;
 	private static Vector2i mouseLoc;
+	private static Word storyModeSub;
 	
 	private float buttonX = 50, buttonY = 0, adjustX, adjustY;
 	private boolean mainMenuOn = false;
+	private boolean storyModeOn = false;
+	private boolean levelScreenOn = false;
+	
+	public void MainMenu() {
+		
+	}
+	
+	public void StoryMode() {
+		
+	}
+	
+	public void LevelScreen() {
+		
+	}
 	
 	public void run () {
-		System.out.println("ButtonFile array length: " + ButtonFile.length);
+		//System.out.println("ButtonFile array length: " + ButtonFile.length);
 		
 		// Create a window
 		RenderWindow window = new RenderWindow();
@@ -67,6 +82,11 @@ public class GameWindow {
 		rect[1].setLocation((float) 440, (float) 540);
 		rect[2].setLocation((float) 475, (float) 632);
 		
+		storyModeSub = new Word();
+		
+		storyModeSub.setWord(storyModeSub.scene1(0), Color.WHITE);
+		storyModeSub.setLocation((float) 67, (float) 605);
+		
 		BGM.loop(true);
 		BGM.playSound();
 
@@ -79,15 +99,17 @@ public class GameWindow {
 			
 			wallpaperIMG.draw(window);
 			for (ImageAct buttonsIMG: ButtonsIMG)
-				buttonsIMG.draw(window);
+			//	buttonsIMG.draw(window);
 			for (GenButton rects: rect)
-				rects.draw(window);
+			//	rects.draw(window);
+			
+			storyModeSub.draw(window);
 			
 			// Update the display with any changes
 			window.display();
 		
 			mouseLoc = mouseMov.getPosition(window);
-
+			
 			//System.out.println(mouseMov.getPosition(window));
 			//System.out.println(rect0.getRectDimensions().x);
 			//System.out.println(rect0.getRectPosition().x);
