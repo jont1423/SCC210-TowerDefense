@@ -25,7 +25,6 @@ public class Word extends Actor {
 	private static String JavaVersion = Runtime.class.getPackage().getImplementationVersion();
 	private static String JdkFontPath = "C:\\Program Files\\Java\\jdk" + JavaVersion + "\\jre\\lib\\fonts\\";
 	private static String JreFontPath = "C:\\Program Files\\Java\\jre" + JavaVersion + "\\lib\\fonts\\";
-	private static int FontSize = 24;
 	private static String FontFile = "LucidaTypewriterRegular.ttf";
 	
 	private String FontPath;
@@ -38,7 +37,7 @@ public class Word extends Actor {
 		else FontPath = JdkFontPath;
 	}
 	
-	public void setWord(String sub, Color c) {
+	public void setWord(String sub, Color c, int FontSize) {
 		// Load the font
 		Font typeWriter = new Font();
 		try {typeWriter.loadFromFile(Paths.get(FontPath+FontFile));} 
@@ -54,7 +53,7 @@ public class Word extends Actor {
 	}
 	
 	public String scene1(int dialouge) {
-		int StringSize = 23;
+		int StringSize = 24;
 		String[] sub = new String[StringSize];
 		sub[0] = "Silver: Crew, we've finally arrived into the Solaris system,";	//Frame 1
 		sub[1] = "we'll be on approach to Solaris VII soon.";						//Frame 1
@@ -69,17 +68,17 @@ public class Word extends Actor {
 		sub[10] = "finished fine tuning them.";										//Frame 4
 		sub[11] = "**BOOOOOOOOOOOOOOOM**";											//Frame 5
 		sub[12] = "(Ship Announcement) **HULL BREACH, AIRLOCK SEALED**";			//Frame 6
-		sub[12] = "Blackbeard: Err... it must be that damned automaton of yours,";	//Frame 7
-		sub[13] = "tampering with the shields it's a liability I say!";				//Frame 7
-		sub[14] = "Silver: Enough of this Blackbeard, we've more urgent matters";	//Frame 8
-		sub[15] = "at hand. Locate the hull breach and repair it.";					//Frame 8
-		sub[16] = "**WE CANNOT APPROACH SOLARIS VII UNTIL THE";						//Frame 9 (Should be RED)
-		sub[17] = "BREACH IS FULLY REPAIRED.**";									//Frame 9 (Should be RED)
-		sub[18] = "(Announcement) **FOREIGN LIFEFORM DETECTED IN LOADING BAY**";	//Frame 10
-		sub[19] = "Silver: Looks like we have a situation on our hands now!";		//Frame 11
-		sub[20] = "**DEPLOY THE DEFENSE TURRETS WE SCAVENGED FROM THE LAST";		//Frame 12 (Should be RED)
-		sub[21] = "MISSION, THEY SHOULD HELP QUARANTINE THE LOADING BAY.**";		//Frame 12 (Should be RED)
-		sub[22] = "Blackbeard: Aye aye captain!";									//Frame 13
+		sub[13] = "Blackbeard: Err... it must be that damned automaton of yours,";	//Frame 7
+		sub[14] = "tampering with the shields it's a liability I say!";				//Frame 7
+		sub[15] = "Silver: Enough of this Blackbeard, we've more urgent matters";	//Frame 8
+		sub[16] = "at hand. Locate the hull breach and repair it.";					//Frame 8
+		sub[17] = "**WE CANNOT APPROACH SOLARIS VII UNTIL THE";						//Frame 9 (Should be RED)
+		sub[18] = "BREACH IS FULLY REPAIRED.**";									//Frame 9 (Should be RED)
+		sub[19] = "(Announcement) **FOREIGN LIFEFORM DETECTED IN LOADING BAY**";	//Frame 10
+		sub[20] = "Silver: Looks like we have a situation on our hands now!";		//Frame 11
+		sub[21] = "**DEPLOY THE DEFENSE TURRETS WE SCAVENGED FROM THE LAST";		//Frame 12 (Should be RED)
+		sub[22] = "MISSION, THEY SHOULD HELP QUARANTINE THE LOADING BAY.**";		//Frame 12 (Should be RED)
+		sub[23] = "Blackbeard: Aye aye captain!";									//Frame 13
 		
 		if (dialouge > StringSize) {
 			System.out.println("Array index out of bound.");
@@ -120,7 +119,7 @@ public class Word extends Actor {
 	}
 	
 	public String scene3(int dialouge) {
-		int StringSize = 4;
+		int StringSize = 5;
 		String[] sub = new String[StringSize];
 		sub[0] = "Kidd: (out of breath) CAPTAIN!!!";								//Frame 1
 		sub[1] = "Kidd: (breathing heavy after stuffing his face with the cake";	//Frame 2
