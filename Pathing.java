@@ -52,7 +52,6 @@ class Pathing {
 	private static Vector2i mouseLoc;
 	//Maybe an actor one for just drawing???
 
-
 	private static int enemyCount = 0;
 	
 	Pathing(RenderWindow r)

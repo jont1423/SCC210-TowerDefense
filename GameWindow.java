@@ -107,8 +107,21 @@ public class GameWindow {
 						wallpaperIMG1.draw(window);
 						//Need to save file to understand what needs setting
 						//Pathing p = new Pathing(window,Which map,Which wave,Base health);
+						
+						//Creating a new save instance
+						Save s = new Save();
+						
+						//Creating new game, use the .contGame() method to continue instead
+						s.newGame("easy");
+						
+						//Creating the instance of the level
 						Pathing p = new Pathing(window);
 						p.run();
+						
+						//Method to save the game (level, round, difficulty)
+						s.saveFile(1,1,"medium");
+						
+						
 					}
 				}
 				else {rect[0].setRectColor(Color.TRANSPARENT, 0);}
