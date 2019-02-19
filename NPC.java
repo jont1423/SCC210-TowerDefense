@@ -102,9 +102,9 @@ import org.jsfml.graphics.*;
 				Color borderColour = background.getBorderColour();
 				Color borderIntersection = background.getIntersectionColour();
 				int accuracy = background.getAccuracy(); //How similar the colours colours are
-				System.out.println("X: " + x + "Y " + y + "Colour: " + iBackground.getPixel((int)x,(int)y));
-				System.out.println("highest: " +highest);
-				System.out.println("lowest: " +lowest);			
+				//System.out.println("X: " + x + "Y " + y + "Colour: " + iBackground.getPixel((int)x,(int)y));
+				//System.out.println("highest: " +highest);
+				//System.out.println("lowest: " +lowest);			
 
 				//Calculates the distances to determine the new direction
 				if(highest<=lowest)
@@ -178,7 +178,7 @@ import org.jsfml.graphics.*;
 				if(directionDistance[compassTwo]<directionDistance[compassOne] && difference < 50)lowest = tempLowest;
 				if(directionDistance[compassOne]<directionDistance[compassTwo] && difference < 50)lowest = tempLowest2;
 				oldDirectionDistance[compassOne] = directionDistance[compassOne];
-				System.out.println("LowestShouldBe: "+ lowest);
+				//System.out.println("LowestShouldBe: "+ lowest);
 			}
 		}
 		
@@ -208,7 +208,7 @@ import org.jsfml.graphics.*;
 					{
 						highest += 64;
 					}
-					System.out.println("Intersection");
+					//System.out.println("Intersection");
 					distance += 64;
 					continue;
 				}
@@ -230,7 +230,7 @@ import org.jsfml.graphics.*;
 			if(direction1.equals("right")) directionDistance[1]=distance;
 			if(direction1.equals("up")) directionDistance[0]=distance;
 			if(direction1.equals("down")) directionDistance[2]=distance;
-			System.out.println("direction: " + direction1+ "distance: " + distance);
+		//	System.out.println("direction: " + direction1+ "distance: " + distance);
 		
 			if(distance>highest && !compass.equals(oppositeDirection))  //Current direction is not oppositeSide
 			{

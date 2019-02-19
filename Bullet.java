@@ -49,9 +49,7 @@ public class Bullet extends ImageActor
 		//System.out.println("Statement "+ check);  
 		if(check)
 		{	
-				System.out.println("Hit");
-				super.setDx(0);
-				super.setDy(0);
+				//System.out.println("Hit");
 				remove = true;
 				enemy.setHealth(5);
 		}
@@ -65,8 +63,8 @@ public class Bullet extends ImageActor
 		double yDiff = calcDistanceY();
 		if(xDiff==0 || yDiff==0) 
 		{
-				super.setDx(0);
-				super.setDy(0);
+				//super.setDx(0);
+				//super.setDy(0);
 				remove = true;
 		}	
 		
@@ -74,8 +72,8 @@ public class Bullet extends ImageActor
 		float fractionX = (float) xDiff/length;
 		float fractionY = (float) yDiff/length;
 		//Adjust dx and dy accordingly
-		System.out.println("Dx: " + dx*fractionX + "Dy: " + dy*fractionY);
-		System.out.println("x: " + this.x + "y: " + this.y);
+		//System.out.println("Dx: " + dx*fractionX + "Dy: " + dy*fractionY);
+		//System.out.println("x: " + this.x + "y: " + this.y);
 		super.setDx(-dx*fractionX);
 		super.setDy(-dy*fractionY);
 		//Once it reaches target remove

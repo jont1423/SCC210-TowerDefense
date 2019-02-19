@@ -1,4 +1,4 @@
-import java.io.File;
+/*import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.nio.file.*;
@@ -40,4 +40,4 @@ public class Minion extends NPC
 		return abilityRadius;
 	}
 	//Draw a circle of the radius
-}
+}*/

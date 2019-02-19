@@ -34,20 +34,31 @@ class Pathing {
 	private static String FontFile  = "LucidaSansRegular.ttf";
 	private String FontPath;	// Where fonts were found
 	private static String Title   = "Constellation";
+	private static RenderWindow window;
 	
-	private static String enemyFile[] = {"enemy.png","enemy2.png","enemy4.png"};
-	private static String towerFile[] = {"tower-1.png"};
-	private static String backgroundFile[] = {"Map1.png","Map2.png","Map3.png"};
+	private static String enemyFile[] = {"Enemies/enemy.png","Enemies/enemy2.png","Enemies/enemy3.png","Enemies/enemy4.png","Enemies/enemy5.png","Enemies/enemy6.png"};
+	private static String towerFile[] = {"Towers/tower-1.png","Towers/tower-2.png","Towers/tower-3.png","Towers/tower-4.png","Towers/tower-5.png","Towers/tower-6.png"};
+	private static String backgroundFile[] = {"Maps/Map1.png","Maps/Map2.png","Maps/Map3.png"};
 	private static Background background;
 	private ArrayList<NPC> npcs = new ArrayList<NPC>( );
 	private ArrayList<Tower> towers = new ArrayList<Tower>( );
 	//private ArrayList<List<Actor>> actors = new ArrayList<List<Actor>>( );
 	private ArrayList<Actor> actors = new ArrayList<Actor>( );
 	private ArrayList<Bullet> bullets = new ArrayList<Bullet>( );
+	
+	private ImageAct ButtonsIMG[];
+	private GenButton rect[];
+	private static Mouse mouseMov;
+	private static Vector2i mouseLoc;
 	//Maybe an actor one for just drawing???
 
 
 	private static int enemyCount = 0;
+	
+	Pathing(RenderWindow r)
+	{
+		window = r;
+	}
 	
 	public ArrayList getActors()
 	{
@@ -67,18 +78,17 @@ class Pathing {
 		//
 		// Create a window
 		//
-		RenderWindow window = new RenderWindow( );
-		ContextSettings settings = new ContextSettings(8);
-		window.create(new VideoMode(screenWidth, screenHeight),
+	//	RenderWindow window = new RenderWindow( );
+		//ContextSettings settings = new ContextSettings(8);
+		/*window.create(new VideoMode(screenWidth, screenHeight),
 				"Testing",
 				WindowStyle.DEFAULT,
-				settings);
+				settings);*/
 				
 		window.setFramerateLimit(60); // Avoid excessive updates
-
-		//
-		// Create some actors
 		
+	
+	
 		//All Maps
 		//OriginX,OriginY,Rotation,filename,StartingArea,BorderColor,IntersectionColor,accuracy
 		//Need to make sure the starting distance is 3 pixels away from either side
@@ -90,18 +100,43 @@ class Pathing {
 		//Background map4 = new Background(512,384,0, ImageFile,new IntRect(49,96,55,131),new Color(239,4,161),new Color(255,255,255),20);
 		//Background map5 = new Background(512,384,0, ImageFile,new IntRect(49,96,55,131),new Color(239,4,161),new Color(255,255,255),20);
 		
+		//Buttons
+		ButtonsIMG = new ImageAct[towerFile.length];
+		for (int i=0; i<towerFile.length; i++)
+			ButtonsIMG[i] = new ImageAct(towerFile[i]);
+		
+		ButtonsIMG[0].setLocation(885f, 77f);
+		ButtonsIMG[1].setLocation(949f, 77f);
+		ButtonsIMG[2].setLocation(885f, 138f);
+		ButtonsIMG[3].setLocation(949f, 138f);
+		ButtonsIMG[4].setLocation(885f, 197f);
+		ButtonsIMG[5].setLocation(949f, 197f);
+		
+		rect = new GenButton[towerFile.length];
+		for(int i=0; i<towerFile.length; i++)
+			rect[i] = new GenButton(40, 43, Color.GREEN, 0);
+		
+		rect[0].setLocation((float) 888, (float) 82);	
+		rect[1].setLocation((float) 950, (float) 82);	
+		rect[2].setLocation((float) 888, (float) 142);	
+		rect[3].setLocation((float) 950, (float) 142);	
+		rect[4].setLocation((float) 888, (float) 202);	
+		rect[5].setLocation((float) 950, (float) 202);	
+	
+		
+		
+		
 		actors.add(map1);														//128,175 //50,95,73,132
 		Clock time = new Clock(); //Need to be done somewhere (as the game is running)
 		Clock frameTime = new Clock(); //Movement is independent of framerate
-		Clock firerate = new Clock(); //Unique to each turret
+	//	Clock firerate = new Clock(); //Unique to each turret
 		
-		npcs.add(new NPC("ID",50,0,134f,134f,0,"enemy2.png", map1));
-		actors.add(npcs.get(0));
+		//npcs.add(new NPC("ID",50,0,134f,134f,0,enemyFile[1], map1));
+		//actors.add(npcs.get(0));
 
-		Tower t = new Tower(screenWidth / 2, screenHeight / 2, 0, towerFile[0],0); 
-		towers.add(t);
+		Tower t = new Tower(screenWidth / 2, screenHeight / 2, 0, towerFile[0],0,map1); 
 		actors.add(t);
-		//
+	
 		while (window.isOpen( )) 
 		{
 			Stack<Actor> toRemove = new Stack<>();
@@ -111,28 +146,38 @@ class Pathing {
 			// Clear the screen
 			window.clear(Color.WHITE);
 			
+			mouseLoc = mouseMov.getPosition(window);
+
+						
 			// Move all the actors around
 			for(Tower tower : towers)
 			{
 				float proximity = (float) Math.pow(tower.getRange(), 2);
 				float shortestDistance = Float.MAX_VALUE;
-
-				for (NPC npc : npcs) {
-					// check if actor is an instance of NPC (enemy class)
-					float currentDistance = tower.calcDistance(npc);
-
-					if (currentDistance <= proximity && currentDistance < shortestDistance)
-					{
-						tower.setNearestEnemy(npc);
-					}	
-					if(npc.getHealth() < 0 ) actors.remove(npc);
-				}
+			
+				//System.out.println("npc empty: " + npcs.isEmpty());
+				//if(!npcs.isEmpty())
+				//{
+				
+					for (NPC npc : npcs) {
+						// check if actor is an instance of NPC (enemy class)
+						float currentDistance = tower.calcDistance(npc);
+		
+						if (currentDistance <= proximity && currentDistance < shortestDistance)
+						{
+							tower.setNearestEnemy(npc);
+						}	
+						if(npc.getHealth() < 0 ) actors.remove(npc);
+						
+					}
+				
+				//}
 				
 									
 				//If statement - Make sure it each turret has 1 bullet at a time, theres a target and checks its been 0.5 seconds since the last bullet was created
-				if(!actors.contains(tower.getBullet())&& tower.getNearestEnemy() != null && firerate.getElapsedTime().asMilliseconds()>500)
+				if (tower.getNearestEnemy() != null && tower.getFireRate() > tower.getCooldown())
 				{
-					firerate.restart();
+					
 					tower.calcBulletOrigin();
 					Bullet b = new Bullet(tower.getBulletOriginX(),tower.getBulletOriginY(),0,"bullet.png",0,500f);
 					b.setTarget(tower.getNearestEnemy());
@@ -140,13 +185,14 @@ class Pathing {
 					bullets.add(b);
 					tower.setBullet(b);
 					b.calculateDistanceToTarget();
+					tower.setFireRate();
 				}
 			}
 			
 			for(Bullet bl : bullets)
 			{
-				//bl.calculateDistanceToTarget();
-				bl.checkProximity();
+				bl.calculateDistanceToTarget();
+				if(bl.enemy != null)bl.checkProximity();
 			}
 
 			for (Actor actor : actors) {
@@ -157,12 +203,19 @@ class Pathing {
 				actor.draw(window);						
 			}
 			
+			for (ImageAct buttonsIMG: ButtonsIMG)
+				buttonsIMG.draw(window);
+			for (GenButton rects: rect)
+				rects.draw(window);
+
+			
+			
 			for (Actor actor : toRemove) {
 				actors.remove(actor);
 			}
 
 			//Enemies spawn every .5  seconds
-			/*if(enemyCount < 250 && time.getElapsedTime().asMilliseconds() > 500)
+			if(enemyCount < 250 && time.getElapsedTime().asMilliseconds() > 500)
 			{
 				Random r = new Random();
 				int random = r.nextInt(enemyFile.length);
@@ -170,7 +223,7 @@ class Pathing {
 				actors.add(npcs.get(npcs.size()-1));
 				enemyCount++;
 				time.restart();
-			}*/
+			}
 			
 			// Update the display with any changes
 			window.display( );
@@ -184,76 +237,61 @@ class Pathing {
 				}
 				if (event.type == Event.Type.MOUSE_MOVED) {
 				
-					//Mapping is no longer necessary as its 1:1
+					//Remove this method in tower and use the one in Actor???
 					t.calcMoveCursor(event.asMouseEvent().position.x, event.asMouseEvent().position.y);
-					
-					/*if(t.within(t.x,t.y)) //This needs to be removed
-					{
-						collision = true;
-					}
-					else
-					{
-						collision = false;
-					}*/
+				}
 				
+				//Buttons
+
+				
+				for(int i=0;i<rect.length;i++)
+				{
+					if (rect[i].detectPos(rect[i].getRectPosition(), rect[i].getRectDimensions(), mouseLoc)) 
+					{
+						rect[i].setRectColor(Color.GREEN, 40); //If not enough money appear red
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							actors.remove(t);
+							t = new Tower(mouseLoc.x, mouseLoc.y, 0, towerFile[i],0,map1);
+							actors.add(t);
+						}
+					}
+						else {rect[i].setRectColor(Color.TRANSPARENT, 0);}
 				}
 				//Draws a tower at the cursors position
 			
-				if(event.type == Event.Type.MOUSE_BUTTON_RELEASED){
-					if(event.asMouseButtonEvent().button == Mouse.Button.LEFT)
-					{
+				if((mouseLoc.x < 855f && mouseLoc.x > 150f) && (mouseLoc.y < 745f && mouseLoc.y > 40))
+				{
+					if(event.type == Event.Type.MOUSE_BUTTON_RELEASED){
+						if(event.asMouseButtonEvent().button == Mouse.Button.LEFT)
+						{
+							
+							if(actors.indexOf(t) !=-1 && t.placementCheck(t.getImg().getGlobalBounds(),towers)) 
+							{
+								towers.add(new Tower(mouseLoc.x, mouseLoc.y, 0, t.getTowerImage(),100,map1));
+								actors.add(towers.get(towers.size()-1));
+							}
+						}
+						else if(event.asMouseButtonEvent().button == Mouse.Button.RIGHT)
+						{
 
-						if(actors.indexOf(t) !=-1) 
-						{
-							towers.add(new Tower((int) event.asMouseEvent().position.x, (int) event.asMouseEvent().position.y, 0, towerFile[0],500));
-							actors.add(towers.get(towers.size()-1));
 						}
-						//if(!collision) actors.remove(b);
-						/*if(t.within(t.x,t.y)) //If cursor is not holding anything, check if the cursor selects any actors????
-						{
-							collision = true;
-						}
-						else
-						{
-							collision = false;
-						}*/
-					}
-					else if(event.asMouseButtonEvent().button == Mouse.Button.RIGHT)
-					{
-						if(actors.indexOf(t) ==-1) 
-						{
-							actors.add(t);
-							t.calcMoveCursor((int) event.asMouseEvent().position.x, (int) event.asMouseEvent().position.y);
-						}
-					}
-				}	
+					}	
+				}
 				
 			}
 		}
 	}
-
-	public static void main (String args[ ]) {
-		Pathing p = new Pathing( );
-		p.run( );
-	}
 }
 /* To do List 
-// NPC - Cant do intersection unless they are teleported to the other side
-// Towers - 
+// Pathing - Constructor for which level/map, save state(wave, base health, difficulty)
+// NPC - Need to test on last 2 maps, need to finalise enemies (stats and sprites) using DB
+// Towers - Towers are still shooting when the enemy is dead (npc arralist wont decrease in size), only allows one bullet at at time across all turrets, Towers are 40 x 40
 // Items - Start this class and make them drop from enemies, including currency and powerups
-// Bullet - Bullet cant correctly go to target as they change direction
-// Pathing now seems to work fine just need to deal with intersectionCollision and making the start area smaller
-// Using scaling to deal with the problem needs to make sure it works for all sides - Works for 1st corner but not subsequent corners
-// ***Bigger sprites obscure small sprites for visibility
-// *** Games lags due to large amount of enemies
-// Enemies not going the correct distance before changing direction e.g. enemy on right wall will go to the bottom
+// Bullet - Depends on how animation is implemented
 // Program Items
-// ** Maybe try to return x and y to ints for simplicity
-// Need to make enemies pass through/under intersections - Hardcoded only works if line sizes stay the same and map size stays the same
 // ***Relies on border colour being in at least 3 directions
 // ***Equal distance should be a non-issue if enemys always starts close or at the edge of the screen
 // ***Only works for straight edges on the borders - Limitation
 // *** If boundaryboxes are used then sprite <= lane size wont fit
 // StartingArea and other values associated with the background will be stored with level
-// Need to make easier to change between maps (use less hardcoded values)
 */

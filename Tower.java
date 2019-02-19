@@ -48,15 +48,21 @@ class Tower extends ImageActor {
 	private int angle = 0;
 	private NPC nearest;
 	private Bullet bullet;
+	private Clock fireRate = new Clock();
+	private int cooldown = 50; //Millseconds before turret can refire
 	private Vector2f bulletOrigin = new Vector2f(x+2f,y-19f);
 	private float bulletOriginX; //Where bullet spawns
 	private float bulletOriginY; //Where bullet spawns
+	private Image iBackground;
+	private String towerImage;
 
-	public Tower(int x, int y, int r, String textureFile, int range) {
+	public Tower(int x, int y, int r, String textureFile, int range, Background background) {
 		super(x, y, r, textureFile);
 		rank = 0;
 		killCount = 0;
 		health = 100;
+		this.towerImage = textureFile;
+		this.iBackground = background.getBackground();
 		this.range = range;
 	}
 
@@ -87,6 +93,68 @@ class Tower extends ImageActor {
 	{
 		return nearest;
 	}
+	
+	String getTowerImage()
+	{
+		return towerImage;
+	}
+	
+	int getCooldown()
+	{
+		return cooldown;
+	}
+	
+	void setFireRate()
+	{
+		fireRate.restart();
+	}
+	
+	long getFireRate()
+	{
+		return fireRate.getElapsedTime().asMilliseconds();
+	}
+	
+	boolean placementCheck( FloatRect boundaries, ArrayList<Tower> towers) //Need to add more parameters
+	{	
+		int boundaryLeft = (int) boundaries.left;
+		int boundaryWidth = (int) boundaries.width;
+		int boundaryTop = (int) boundaries.top;
+		int boundaryHeight = (int) boundaries.height;
+		//System.out.println("Boundaryx " + boundaryLeft + "BoundaryY" + boundaryTop);
+		//System.out.println("BoundaryWidth " + boundaryWidth + "BoundaryYHeight" + boundaryHeight);
+		for(int i=boundaryLeft;i<boundaryLeft+boundaryWidth;i++)
+		{
+			for(int j=boundaryTop;j<boundaryTop+boundaryHeight;j++)
+			{
+				Color pixel = iBackground.getPixel(i,j);
+				//System.out.println("Colour: " + pixel);
+				//System.out.println("X: " + i + "Y: " + j);
+				Color colourGreen = new Color(75,105,47);
+				Color colourGrey = new Color(58,68,78);
+				boolean place1 = isSimilar(pixel,colourGreen,40);
+				boolean place2 = isSimilar(pixel,colourGrey,40);
+				if(!(place1 || place2)) return false;
+			}
+		}
+		
+		for(Tower t : towers)
+		{
+			if(t != this && boundaries.contains(t.x,t.y))
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	boolean isSimilar(Color colour1, Color colour2, int accuracy)
+	{	
+		if(colour1.r < (colour2.r-accuracy) || colour1.r > (colour2.r+accuracy)) return false;			
+		if(colour1.g < (colour2.g-accuracy) || colour1.g > (colour2.g+accuracy)) return false;			
+		if(colour1.b < (colour2.b-accuracy) || colour1.b > (colour2.b+accuracy)) return false;
+		return true;
+	}
 
 	void calcMove(int minx, int miny, int maxx, int maxy, float time) {
 		//NPC nearest = getNearestEnemy();
@@ -96,6 +164,7 @@ class Tower extends ImageActor {
 			angle =  (int) Math.toDegrees(Math.atan2(this.y - nearest.y, this.x - nearest.x)) - angleOffset;
 			this.getImg().setRotation(angle);
 		}
+	
 	}
 	
 	void calcBulletOrigin()
@@ -108,7 +177,7 @@ class Tower extends ImageActor {
 	
 		//Assumes rotation of picture returns to face up
 		//if(angle <0) angle = Math.abs(angle) + 360;
-		float angle2 = (int) Math.toRadians((double)angle-180);
+		float angle2 = (int) Math.toRadians((double)angle);
 		/*System.out.println("Angle: "+ angle2);
 		System.out.println("Math.sin(angle) "+ Math.sin(angle2));
 		System.out.println("Math.cos(angle) "+ Math.cos(angle2));*/
@@ -122,8 +191,8 @@ class Tower extends ImageActor {
 		bulletOriginY = (float)(ra*Math.cos(-angle2) + y);
 		
 
-		/*System.out.println("Bulletoriginx: " + bulletOriginX);
-		System.out.println("Bulletoriginy: " + bulletOriginY);*/
+		System.out.println("Bulletoriginx: " + bulletOriginX);
+		System.out.println("Bulletoriginy: " + bulletOriginY);
 
 	}
 	

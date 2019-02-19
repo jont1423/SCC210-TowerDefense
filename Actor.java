@@ -30,7 +30,11 @@ abstract class Actor {
 		//
 		abstract void calcMove(int minx, int miny, int maxx, int maxy, float time);
 		
-
+		public void setLocation (Float x, Float y) {
+			this.x = x;
+			this.y = y;
+			setPosition.accept((float) x, (float) y);
+		}
 		//
 		// Reposition the object
 		//
