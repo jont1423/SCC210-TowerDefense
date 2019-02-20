@@ -52,6 +52,8 @@ public class Word extends Actor {
 		setPosition = text::setPosition;
 	}
 	
+	public void setColor(Color c) {text.setColor(c);}
+	
 	public String scene1(int dialouge) {
 		int StringSize = 24;
 		String[] sub = new String[StringSize];
