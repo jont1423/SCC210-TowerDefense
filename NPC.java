@@ -2,9 +2,11 @@ import org.jsfml.graphics.*;
 
  class NPC extends ImageActor //This consists of both Enemies and Friendlies enemy.java is redundant???
 	{
-		private String ID; 		//dx and dy dependent on enemyID
-		private int health;
-		private int armour;
+		String ID; 
+		int health;
+		int armour;
+		int[] type; //Element of enemy
+		int dropCount; //Number of drops when killed
 		private Image iBackground;
 		private Background background;
 		//private int[] direction = new int[] {0,0,0,0}; //Can be removed use compass variable instead
@@ -17,12 +19,8 @@ import org.jsfml.graphics.*;
 		private boolean firstLoop = false;
 		private  int screenWidth  = 1024;
 		private  int screenHeight = 768;
-
-		//private boolean intersectionCollision = false;
-
-		//Database will be used to retrieve ID, health and armour
 		
-		NPC(String ID,int health, int armour,float xPixelsPerSecond, float yPixelsPerSecond,int r, String textureFile, Background background)
+		NPC(float xPixelsPerSecond, float yPixelsPerSecond,int r, String textureFile, Background background)
 		{
 	
 			super(background.getStartingX(),background.getStartingY(),r,textureFile);
@@ -34,14 +32,9 @@ import org.jsfml.graphics.*;
 			this.health = health;
 			this.armour = armour;
 		}
-		//Cant put into actor its too generic
-		/*place() -- In actor
-		{
-			//Animaton functions in animation
-			//call to actor .add() in actor
-		}*/
 		void die()
 		{
+			health=0;
 			remove = true;
 			//Animation funcions in animation
 			//return (health <=0)
@@ -96,9 +89,8 @@ import org.jsfml.graphics.*;
 			}
 		}
 
-		void pathCheck() //Implemented by sub classes
+		void pathCheck()
 		{
-				//Hard-code values need to be changed for any map
 				Color borderColour = background.getBorderColour();
 				Color borderIntersection = background.getIntersectionColour();
 				int accuracy = background.getAccuracy(); //How similar the colours colours are
@@ -121,7 +113,7 @@ import org.jsfml.graphics.*;
 					oldDirectionDistance[3] = directionDistance[3];
 					compass = tempCompass;
 
-					System.out.println("Compass: " + compass);
+				//	System.out.println("Compass: " + compass);
 					//System.out.println("Highest: " + highest);
 
 					firstLoop=false;

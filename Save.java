@@ -17,6 +17,21 @@ public class Save {
 		
 	}
 	
+	public int getCurrLvl()
+	{
+		return currLvl;
+	}
+	
+	public int getCurrRound()
+	{
+		return currRound;
+	}
+	
+	public String getDiff()
+	{
+		return diff;
+	}
+	
 	public void setDiff(String diff){
 	
 		this.diff = diff;
@@ -28,11 +43,8 @@ public class Save {
 		currLvl = 1;
 		currRound = 1;
 		
-		this.diff = diff;
-		
-		//Pathing p = new Pathing(currLvl, currRound, diff, r);
-		//p.run();
-		
+		setDiff("easy");
+				
 	}
 	
 	//Load the save and continue the game from the previous Level and round
@@ -44,10 +56,7 @@ public class Save {
 			currRound = 1;
 			diff.equals("easy");
 		}
-		
-		//Pathing p = new Pathing(currLvl, currRound, diff, r);
-		//p.run();
-		
+			
 	}
 	
 	//Saves the current values to the .txt file

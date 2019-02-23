@@ -27,7 +27,7 @@ abstract class Actor {
 		}
 		//
 		// Work out where object should be for next frame
-		//
+		// THIS METHOD NEED TO BE MOVED DOWN
 		abstract void calcMove(int minx, int miny, int maxx, int maxy, float time);
 		
 		public void setLocation (Float x, Float y) {
@@ -41,6 +41,16 @@ abstract class Actor {
 		void performMove( ) {
 			rotate.accept(r);
 			setPosition.accept(x, y);
+		}
+		
+		float getX()
+		{
+			return x;
+		}
+		
+		float getY()
+		{
+			return y;
 		}
 		//Tower Method
 		boolean needsRemoving(int width, int height) {

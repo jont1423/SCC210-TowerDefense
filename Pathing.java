@@ -324,7 +324,7 @@ class Pathing {
 						"\n\nDamage " + t.getDamage()+
 						"\n\nType\n" + t.getType()+
 						"\n\nRange " + t.getRange()+
-						"\n\nFirerate\n" + 1000/t.getCooldown()+ "SPS" ,fontColour,16);
+						"\n\nFirerate\n" + 1000/t.getCooldown()+ "SPS" ,Color.YELLOW,16);
 
 		if(!actors.contains(towerInfo))
 		{

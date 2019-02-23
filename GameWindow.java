@@ -115,13 +115,11 @@ public class GameWindow {
 						s.newGame("easy");
 						
 						//Creating the instance of the level
-						Pathing p = new Pathing(window);
+						Pathing p = new Pathing(window, s);
 						p.run();
 						
-						//Method to save the game (level, round, difficulty)
+						//Method to save the game (level, round, difficulty) -- Done in pathing
 						s.saveFile(1,1,"medium");
-						
-						
 					}
 				}
 				else {rect[0].setRectColor(Color.TRANSPARENT, 0);}
