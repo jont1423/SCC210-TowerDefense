@@ -3,7 +3,7 @@ public class Fenrir extends NPC
 {
 	public Fenrir(float xPixelsPerSecond, float yPixelsPerSecond,int r,String diffculty, Background background)
 	{
-		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy4.png",background);
+		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/Death/enemy4.png",background);
 		ID = "Fenrir";
 		type = new String[]{"laser"};
 		defaultType = new String[]{"laser"};
