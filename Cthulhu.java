@@ -3,7 +3,7 @@ public class Cthulhu extends NPC
 {
 	public Cthulhu(float xPixelsPerSecond, float yPixelsPerSecond,int r,String diffculty, Background background)
 	{
-		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy6.png",background);
+		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/Death/enemy6.png",background);
 		ID = "Cthulhu";
 		type = new String[]{"electric","cryo","laser"};
 		defaultType = new String[]{"electric","cryo","laser"};
