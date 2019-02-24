@@ -3,7 +3,7 @@ public class SpeedDemon extends NPC
 {
 	public SpeedDemon(float xPixelsPerSecond, float yPixelsPerSecond,int r,String diffculty, Background background)
 	{
-		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy2.png",background);
+		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/Death/enemy2.png",background);
 		ID = "SpeedDemon";
 		type = new String[]{"warp"};
 		defaultType = new String[]{"warp"};
