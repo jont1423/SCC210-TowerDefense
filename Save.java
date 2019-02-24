@@ -40,7 +40,7 @@ public class Save {
 	
 	public void newGame(String diff){
 		
-		currLvl = 1;
+		currLvl = 5;
 		currRound = 1;
 		
 		setDiff("easy");

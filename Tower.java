@@ -314,19 +314,34 @@ abstract class Tower extends ImageActor {
 		// setting the shortest distance to the maximum float value
 		float shortestDistance = Float.MAX_VALUE;
 		// setting the nearest enemy to null
-		nearest = null;
+		//nearest = null;
+		
+		if(nearest==null)
+		{
+			// looping through all the enemies
+			for (NPC enemy : enemies) {
+				// getting the distance to the enemy from the tower
+				float distanceTo = calcDistance(enemy);
 
-		// looping through all the enemies
-		for (NPC enemy : enemies) {
-			// getting the distance to the enemy from the tower
-			float distanceTo = calcDistance(enemy);
-
-			// checking if the distance is valid and the shortest
-			if (distanceTo <= proximity && distanceTo < shortestDistance) {
-				// setting the nearest enemy
-				nearest = enemy;
+				// checking if the distance is valid and the shortest
+				if (distanceTo <= proximity && distanceTo < shortestDistance) {
+					// setting the nearest enemy
+					nearest = enemy;
+				}
 			}
 		}
+		else
+		{
+			// getting the distance to the enemy from the tower
+			float distanceTo = calcDistance(nearest);
+
+			// checking if the distance is valid and the shortest
+			if (!(distanceTo <= proximity && distanceTo < shortestDistance)) {
+				// setting the nearest enemy
+				nearest = null;
+			}
+		}
+
 
 		// returning the nearest enemy
 		return nearest;
@@ -335,6 +350,11 @@ abstract class Tower extends ImageActor {
 	void setNearestEnemy(NPC nearest)
 	{
 		 this.nearest = nearest;
+	}
+	
+	NPC getNearest()
+	{
+		return nearest;
 	}
 	/**
 	 * This function moves the current tower to the x and y of the mouse

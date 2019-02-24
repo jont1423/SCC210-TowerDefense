@@ -83,7 +83,8 @@ class Pathing {
 	private int scrapValue = baseScrapValue;
 	private int damageMultiplier;
 	private int[] enemyComposition = new int[6]; //Each index represents the number of that enemy for the wave
-
+	private int noOfEnemyTypes;
+	
 	private Word gameInfo = new Word();
 	private Word towerInfo = new Word();
 	private Word enemyInfo = new Word();
@@ -131,30 +132,35 @@ class Pathing {
 		{
 			maxRound = 10;
 			selectedMap = map1;
+			noOfEnemyTypes = 1;
 			actors.add(map1);
 		}
 		else if(currentLevel == 2)
 		{
 			maxRound = 20;
 			selectedMap = map2;
+			noOfEnemyTypes = 3;
 			actors.add(map2);
 		}
 		else if(currentLevel == 3)
 		{
 			maxRound = 30;
 			selectedMap = map3;
+			noOfEnemyTypes = 5;
 			actors.add(map3);
 		}
 		else if(currentLevel == 4)
 		{
 			maxRound = 40;
 			selectedMap = map4;
+			noOfEnemyTypes = 6;
 			actors.add(map4);
 		}
 		else if(currentLevel == 5)
 		{		
 			maxRound = 50;
 			selectedMap = map5;
+			noOfEnemyTypes = 6;
 			actors.add(map5);
 		}
 		else
@@ -168,18 +174,33 @@ class Pathing {
 			baseHealth = 200;
 			roundTimer = 5f; 
 			enemyCount = 50;
+			for(int i=0;i<enemyCount;i++)
+			{
+				Random r = new Random();
+				enemyComposition[r.nextInt(noOfEnemyTypes)]++;
+			}
 		}
 		else if(difficulty.equals("intermediate"))
 		{
 			baseHealth = 150;
 			roundTimer = 45f; 
 			enemyCount = 500;
+			for(int i=0;i<enemyCount;i++)
+			{
+				Random r = new Random();
+				enemyComposition[r.nextInt(noOfEnemyTypes)]++;
+			}
 		}
 		else if(difficulty.equals("hard"))
 		{
 			baseHealth = 100;
 			roundTimer = 30f; 
 			enemyCount = 1000;
+			for(int i=0;i<enemyCount;i++)
+			{
+				Random r = new Random();
+				enemyComposition[r.nextInt(noOfEnemyTypes)]++;
+			}
 		}
 	}
 	
@@ -386,14 +407,13 @@ class Pathing {
 			itemNumber = 4;
 		}
 		Item drop = new Item(npc.getX(),npc.getY(),itemNumber);
-		items.add(drop);//Need to be changed so no items spawn in if enemy died at the end
+		items.add(drop);
 		actors.add(drop);
 	}
 	
 	public void updateTimers()
 	{
 		if(wTime != null) roundTimer -= wTime.restart().asSeconds();
-		//if(damageTime != null)  -= wTime.restart().asSeconds();
 	}
 
 	
@@ -405,16 +425,6 @@ class Pathing {
 		//
 		if ((new File(JreFontPath)).exists( )) FontPath = JreFontPath;
 		else FontPath = JdkFontPath;
-
-		//
-		// Create a window
-		//
-	//	RenderWindow window = new RenderWindow( );
-		//ContextSettings settings = new ContextSettings(8);
-		/*window.create(new VideoMode(screenWidth, screenHeight),
-				"Testing",
-				WindowStyle.DEFAULT,
-				settings);*/
 				
 		window.setFramerateLimit(60); // Avoid excessive updates
 		
@@ -422,7 +432,7 @@ class Pathing {
 		ButtonsIMG = new ImageAct[towerFile.length];
 		for (int i=0; i<towerFile.length; i++)
 			ButtonsIMG[i] = new ImageAct(towerFile[i]);
-		
+			
 		ButtonsIMG[0].setLocation(885f, 77f);
 		ButtonsIMG[1].setLocation(949f, 77f);
 		ButtonsIMG[2].setLocation(885f, 138f);
@@ -503,9 +513,34 @@ class Pathing {
 					//Need to change this
 					enemyCount = 50;
 					roundTimer = 5;
+					for(int i=0;i<enemyCount;i++)
+					{
+						Random r = new Random();
+						enemyComposition[r.nextInt(noOfEnemyTypes)]++;
+						System.out.print("Pre-Gremlins: " + enemyComposition[0]);
+					}
 				}
-				if(difficulty.equals("medium")) enemyCount = 500;
-				if(difficulty.equals("hard")) enemyCount = 1000;
+				if(difficulty.equals("medium")) 
+				{
+					enemyCount = 500;
+					roundTimer = 5;
+					for(int i=0;i<enemyCount;i++)
+					{
+						Random r = new Random();
+						enemyComposition[r.nextInt(noOfEnemyTypes)]++;
+					}
+			
+				}
+				if(difficulty.equals("hard"))
+				{
+					enemyCount = 1000;
+					roundTimer = 5;
+					for(int i=0;i<enemyCount;i++)
+					{
+						Random r = new Random();
+						enemyComposition[r.nextInt(noOfEnemyTypes)]++;
+					}
+				}
 				enemiesDead = 0;
 				round++;
 				//Go to next screen
@@ -514,6 +549,7 @@ class Pathing {
 					GameWindow g = new GameWindow();
 					g.run();
 				}
+				
 				
 				startTime();
 			}
@@ -544,17 +580,10 @@ class Pathing {
                 }
 				
 				//Shooting of the tower
-				/*if (tower.getNearestEnemy(npcs) != null && tower.getFireRate() > tower.getCooldown())
+				if (tower.getNearestEnemy(npcs) != null && tower.getFireRate() > tower.getCooldown())
 				{
-					tower.calcBulletOrigin();
-					Bullet b = new Bullet(tower.getBulletOriginX(),tower.getBulletOriginY(),0,"bullet.png",0,500f);
-					b.setTarget(tower.getNearestEnemy(npcs));
-					actors.add(b);
-					bullets.add(b);
-					tower.setBullet(b);
-					b.calculateDistanceToTarget();
-					tower.setFireRate();
-				}*/
+					tower.getNearest().setHealth(tower.getType(),tower.getDamage());
+				}
 				// performing the move and drawing to the window
                 tower.performMove();
                 tower.draw(window);
@@ -564,7 +593,6 @@ class Pathing {
 			{
 				if(npc.getHealth() <= 0 ) 
 				{	
-					toRemove.push(npc);
 					npcToRemove.push(npc);
 					enemiesAlive--;
 					enemiesDead++;
@@ -584,6 +612,13 @@ class Pathing {
 							System.exit(0);
 						}
 					}
+					for(Tower tower: towers)
+					{
+						if(tower.getNearest()==npc)
+						{
+							tower.setNearestEnemy(null);
+						}
+					}
 
 				}
 				for(Tower tower: towers)
@@ -599,6 +634,7 @@ class Pathing {
 						}
 					
 					}
+				
 				}
 				npc.calcMove(0, 0, screenWidth, screenHeight,elapsedTime);
 				npc.performMove();
@@ -640,12 +676,54 @@ class Pathing {
 			{		
 				if((enemiesDead+enemiesAlive) < enemyCount && time.getElapsedTime().asMilliseconds() > 500)
 				{
-					//Random r = new Random();
-					//int random = r.nextInt(enemyFile.length);
-					Gremlin enemy = new Gremlin(134f, 134f, 0,difficulty, selectedMap);
-					npcs.add(enemy);
-					//npcs.add(new NPC(134f,134f,0,enemyFile[random], selectedMap));
-					//actors.add(enemy);
+					Random r = new Random();
+					int random = r.nextInt(noOfEnemyTypes);
+					while(true)
+					{
+						if(noOfEnemyTypes==0)
+							break;
+						else if(enemyComposition[random]==0)
+						{
+							if(random==noOfEnemyTypes-1)
+							{
+								noOfEnemyTypes -=1;
+							}
+						}
+						else
+						{
+								if(random==0)
+								{
+									Gremlin enemy = new Gremlin(134f, 134f, 0,difficulty, selectedMap);
+									npcs.add(enemy);
+								}
+								else if(random==1)
+								{
+									SpeedDemon enemy = new SpeedDemon(134f, 134f, 0,difficulty, selectedMap);
+									npcs.add(enemy);
+								}
+								else if(random==2)
+								{
+									Yeti enemy = new Yeti(134f, 134f, 0,difficulty, selectedMap);
+									npcs.add(enemy);
+								}
+								else if(random==3)
+								{
+									Fenrir enemy = new Fenrir(134f, 134f, 0,difficulty, selectedMap);
+									npcs.add(enemy);
+								}
+								else if(random==4)
+								{
+									Phoenix enemy = new Phoenix(134f, 134f, 0,difficulty, selectedMap);
+									npcs.add(enemy);
+								}
+								else if(random==5)
+								{
+									Cthulhu enemy = new Cthulhu(134f, 134f, 0,difficulty, selectedMap);
+									npcs.add(enemy);
+								}
+								break;
+						}
+					}
 					time.restart();
 					enemiesAlive++;
 				}
@@ -859,7 +937,7 @@ class Pathing {
 }
 /* To do List 
 // Pathing - Constructor for which level/map, save state(wave, base health, difficulty),Enemy composition for each wave e.g only 1 enemy type for level 1
-// NPC - Need make sure NPC's complete the track consistently,Need to randomise enemy spawns
+// NPC - Need make sure NPC's complete the track consistently,Random chance for even the toughest enemies to spawn (roundNumber * chance to spawn to increse the odds)
 // Towers - Implement turret upgrades,Towers need a cost
 // Items - Just needs testing
 // Cleanup all classes
