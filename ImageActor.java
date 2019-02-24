@@ -75,4 +75,26 @@ abstract class ImageActor extends Actor {
 			return img;
 		}
 		
+		public void anim(int left, int height, int imgType)
+		{	
+		
+			if(imgType ==1){
+					IntRect rect = new IntRect(left,0,32,32);
+					img.setTextureRect(rect);
+					img.setOrigin ( new Vector2f(16,height));
+					
+			}else if(imgType == 2){
+					IntRect rect = new IntRect(left,0,128,138);
+					img.setTextureRect(rect);
+					img.setOrigin ( new Vector2f(64,height));
+				
+			}else if(imgType == 3){			
+					IntRect rect = new IntRect(left,0,48,465);
+					img.setTextureRect(rect);
+					img.setOrigin ( new Vector2f(24,height));
+			
+			}
+			
+		}
+		
 }
