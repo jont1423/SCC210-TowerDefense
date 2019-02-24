@@ -39,6 +39,7 @@ abstract class Tower extends ImageActor {
 	private float bulletOriginY; //Where bullet spawns
 	private Image iBackground;
 	private String towerImage;
+	private int frame;// frame used for animation
 
 	public Tower(float x, float y, int r, String textureFile, Background background, boolean placed) {
 		super(x, y, r, textureFile);
@@ -77,6 +78,16 @@ abstract class Tower extends ImageActor {
 		float yDiff = this.y - b.y;
 		// calculating the squared distance between the points
 		return (float) (Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+	}
+	
+	void setFrame(int i)
+	{
+		frame = i;
+	}
+	
+	int getFrame()
+	{
+		return frame;
 	}
 	
 	void setBullet(Bullet bullet)
