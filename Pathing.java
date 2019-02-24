@@ -36,14 +36,15 @@ class Pathing {
 	private static String Title   = "Constellation";
 	private static RenderWindow window;
 	
-	private static String enemyFile[] = {"Enemies/enemy.png","Enemies/enemy2.png","Enemies/enemy3.png","Enemies/enemy4.png","Enemies/enemy5.png","Enemies/enemy6.png"};
+	private static String enemyFile[] = {"Enemies/Death/enemy1.png","Enemies/Death/enemy2.png","Enemies/Death/enemy3.png","Enemies/Death/enemy4.png","Enemies/Death/enemy5.png","Enemies/Death/enemy6.png"};
+	
 	private static String towerFile[] = {
 											"Towers/tower-1.png","Towers/tower-2.png","Towers/tower-3.png",
 											"Towers/tower-4.png","Towers/tower-5.png","Towers/tower-6.png",
 											"Towers/tower-7.png","Towers/tower-8.png","Towers/tower-9.png",
 											"Towers/tower-11.png","Towers/tower-12.png","Towers/tower-13.png"};
 											
-	private static String animFile[]  = {
+	private static String tAnimFile[]  = {
 											"Towers/1-alien/1.png","Towers/2-miniship/1.png","Towers/3-minicannon/1.png",
 											"Towers/4-starship/1.png","Towers/5-startower/1.png","Towers/6-galaxygun/1.png",
 											"Towers/7-dreadnought/1.png","Towers/8-ionturret/1.png","Towers/9-warpship/1.png",
@@ -566,7 +567,7 @@ class Pathing {
 						}else{
 							tower.setFrame(0);
 						}
-					tower.anim(tower.getFrame(),115);
+					tower.anim(tower.getFrame(),115,2);
 					
 					actors.add(b);
 					bullets.add(b);
@@ -574,7 +575,7 @@ class Pathing {
 					b.calculateDistanceToTarget();
 					tower.setFireRate();
 				}else if(tower.getPlaced()==true){
-				tower.anim(0,115);
+				tower.anim(0,115,2);
 				}
 				
 				
@@ -584,16 +585,21 @@ class Pathing {
                 tower.draw(window);
 			}
 			
+			
 			for(NPC npc: npcs)
 			{
-				if(npc.getHealth() <= 0 ) 
+				if(npc.getHealth() <= 0) 
 				{	
+					
+					
 					toRemove.push(npc);
 					npcToRemove.push(npc);
+						
 					System.out.println("NPC removed");
 					enemiesAlive--;
 					enemiesDead++;
 					generateItem(npc);
+					
 				}
 			}
 			
@@ -636,7 +642,9 @@ class Pathing {
 					int random = r.nextInt(enemyFile.length);
 					Gremlin enemy = new Gremlin(134f, 134f, 0,difficulty, selectedMap);
 					npcs.add(enemy);
+					enemy.anim(0,16,1);
 					//npcs.add(new NPC(134f,134f,0,enemyFile[random], selectedMap));
+					
 					actors.add(enemy);
 					time.restart();
 					enemiesAlive++;
@@ -756,9 +764,9 @@ class Pathing {
 								// checking if the place we are trying to place the tower is valid
 								if (towerToPlace.placementCheck(mouseLoc.x, mouseLoc.y, towerToPlace.getImg().getGlobalBounds(), towers)) {
 									// updating the tower to acknowledge it has been placed
-									towerToPlace.changeSpriteImage(animFile[selectedTower]);
+									towerToPlace.changeSpriteImage(tAnimFile[selectedTower]);
 									towerToPlace.setPlaced(true);
-									towerToPlace.anim(0,115);
+								
 									
 									// resetting the towerToPlace variable to null
 									towerToPlace = null;
