@@ -3,7 +3,7 @@ public class Yeti extends NPC
 {
 	public Yeti(float xPixelsPerSecond, float yPixelsPerSecond,int r,String diffculty, Background background)
 	{
-		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy3.png",background);
+		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/Death/enemy3.png",background);
 		ID = "Yeti";
 		type = new String[]{"electric","cryo"};
 		defaultType = new String[]{"electric","cryo"};
