@@ -3,7 +3,7 @@ public class Gremlin extends NPC
 {
 	public Gremlin(float xPixelsPerSecond, float yPixelsPerSecond,int r,String diffculty, Background background)
 	{
-		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy.png",background);
+		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/Death/enemy1.png",background);
 		ID = "Gremlin";
 		type = new String[]{"electric"};
 		defaultType = new String[]{"electric"};
