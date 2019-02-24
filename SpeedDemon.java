@@ -5,8 +5,9 @@ public class SpeedDemon extends NPC
 	{
 		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy2.png",background);
 		ID = "SpeedDemon";
-		type = new int[]{0,0,0,0,0};
-		dropCount = 2; //Number of drops when killed
+		type = new String[]{"warp"};
+		defaultType = new String[]{"warp"};
+		dropCount = 2;
 		//Difficulty adjusments (diffculty paramter)
 		if(diffculty.equals("easy"))
 		{

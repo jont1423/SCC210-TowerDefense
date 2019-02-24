@@ -5,7 +5,8 @@ public class Gremlin extends NPC
 	{
 		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy.png",background);
 		ID = "Gremlin";
-		type = new int[]{0,0,0,0,0};
+		type = new String[]{"electric"};
+		defaultType = new String[]{"electric"};
 		dropCount = 1;
 		//Difficulty adjusments (diffculty paramter)		
 		if(diffculty.equals("easy"))

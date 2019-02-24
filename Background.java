@@ -7,16 +7,18 @@ import org.jsfml.graphics.*;
 public class Background extends ImageActor
 	{
 		//These details need to be read from file
-		IntRect startingArea; //Area that enemy sprites can spawn
-		Color borderColor; //Color of the border
-		Color intersectionColor; //Color of the intersection
-		Color endColor; //Color of the intersection
+		private IntRect startingArea; //Area that enemy sprites can spawn
+		private Color borderColor; //Color of the border
+		private Color intersectionColor; //Color of the intersection
+		private Color placementColor1; //Color of the intersection
+		private Color placementColor2; //Color of the intersection
+		private Color endColor; //Color of the intersection
 		int accuracy; // How similar should the colours be
 		
 		Image background = new Image();
 	
 		
-		Background(float x, float y, int r, String textureFile, IntRect startingArea, Color borderColor, Color intersectionColor, int accuracy)
+		Background(float x, float y, int r, String textureFile, IntRect startingArea, Color borderColor, Color intersectionColor,Color placementColor1,Color placementColor2,int accuracy)
 		{
 			super(x,y,r,textureFile);
 			super.setDx(0);
@@ -34,6 +36,8 @@ public class Background extends ImageActor
 			this.startingArea = startingArea; 
 			this.borderColor = borderColor;
 			this.intersectionColor = intersectionColor;
+			this.placementColor1 = placementColor1;
+			this.placementColor2 = placementColor2;
 			this.accuracy = accuracy;
 			System.out.println("BackgroundSizeX: " + background.getSize().x);
 			System.out.println("BackgroundSizeY: " + background.getSize().y);
@@ -71,6 +75,16 @@ public class Background extends ImageActor
 		public Color getIntersectionColour()
 		{
 			return intersectionColor;
+		}
+		
+		public Color getPlacementColor1()
+		{
+			return placementColor1;
+		}
+		
+		public Color getPlacementColor2()
+		{
+			return placementColor2;
 		}
 		
 		public int getAccuracy()

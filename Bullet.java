@@ -51,7 +51,7 @@ public class Bullet extends ImageActor
 		{	
 				//System.out.println("Hit");
 				remove = true;
-				enemy.setHealth(5);
+				//enemy.setHealth(5);
 		}
 	
 	}

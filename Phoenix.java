@@ -5,8 +5,9 @@ public class Phoenix extends NPC
 	{
 		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy5.png",background);
 		ID = "Phoenix";
-		type = new int[]{0,0,0,0,0};
-		dropCount = 1;
+		type = new String[]{"star","warp"};
+		defaultType = new String[]{"star","warp"};
+		dropCount = 3;
 		//Difficulty adjusments (diffculty paramter)		
 		if(diffculty.equals("easy"))
 		{

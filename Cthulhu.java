@@ -5,8 +5,9 @@ public class Cthulhu extends NPC
 	{
 		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy6.png",background);
 		ID = "Cthulhu";
-		type = new int[]{0,0,0,0,0};
-		dropCount = 1;
+		type = new String[]{"electric","cryo","laser"};
+		defaultType = new String[]{"electric","cryo","laser"};
+		dropCount = 5;
 		//Difficulty adjusments (diffculty paramter)		
 		if(diffculty.equals("easy"))
 		{

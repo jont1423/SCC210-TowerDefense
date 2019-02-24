@@ -13,42 +13,40 @@ import org.jsfml.window.*;
 import org.jsfml.window.event.*;
 import org.jsfml.graphics.*;
 
-class Tower extends ImageActor {
+abstract class Tower extends ImageActor {
 
-	private String ID;
-	private int killCount;
-	private int rank;
-	private String type;
-	private int damage;
-	private final int baseDamage = 10; //This variable needs to moved to subclasses
-	private final int baseCooldown = 50; //This variable needs to moved to subclasses
+	String ID;
+	int killCount = 0 ;
+	int rank = 0;
+	String type;
+	int damage;
+	int baseDamage; //This variable needs to moved to subclasses
+	int baseCooldown; //This variable needs to moved to subclasses
 	private boolean placed;
+	boolean isTrap;
+	int trapHealth;
+	int cost;
 
-	private float range;
+	float range;
 	private int angleOffset = 90;
 	private int angle = 0;
 	private NPC nearest;
 	private Bullet bullet;
 	private Clock fireRate = new Clock();
-	private int cooldown; //Millseconds before turret can refire
+	int cooldown; //Millseconds before turret can refire
 	private Vector2f bulletOrigin = new Vector2f(x+2f,y-19f);
 	private float bulletOriginX; //Where bullet spawns
 	private float bulletOriginY; //Where bullet spawns
 	private Image iBackground;
 	private String towerImage;
 
-	public Tower(float x, float y, int r, String textureFile, int range, Background background, boolean placed) {
+	public Tower(float x, float y, int r, String textureFile, Background background, boolean placed) {
 		super(x, y, r, textureFile);
-		rank = 0;
-		killCount = 0;
-		damage = 5;
-		ID = "Tower";
 		this.towerImage = textureFile;
 		this.iBackground = background.getBackground();
-		this.range = range;
-		this.damage = baseDamage;
-		this.cooldown = baseCooldown;
 	}
+	
+	abstract void upgrade();
 
 	/**
 	 * This function calculates the distance between a tower and a vector2f
@@ -101,6 +99,11 @@ class Tower extends ImageActor {
 		return rank;
 	}
 	
+	int getCost()
+	{
+		return cost;
+	}
+	
 	void setDamage(float multiplier)
 	{
 		if(damage == baseDamage) damage *= (int) multiplier;			
@@ -113,6 +116,21 @@ class Tower extends ImageActor {
 	boolean getPlaced()
 	{
 		return placed;
+	}
+	
+	boolean isTrap()
+	{
+		return isTrap;
+	}
+	
+	void setTrapHealth()
+	{
+		trapHealth -= 5;
+	}
+	
+	int getTrapHealth()
+	{
+		return trapHealth;
 	}
 	
 	int getDamage()
@@ -175,7 +193,7 @@ class Tower extends ImageActor {
 		return fireRate.getElapsedTime().asMilliseconds();
 	}
 	
-	boolean placementCheck(int x, int y, FloatRect boundaries, ArrayList<Tower> towers)
+	boolean placementCheck(int x, int y, FloatRect boundaries, ArrayList<Tower> towers,Background selectedMap)
 	{
 		// Looping over all the towers
 		FloatRect towerBoundaries = this.getImg().getGlobalBounds();
@@ -188,25 +206,27 @@ class Tower extends ImageActor {
 			}
 		}
 
-		int boundaryLeft = (int) boundaries.left;
+		/*int boundaryLeft = (int) boundaries.left;
 		int boundaryWidth = (int) boundaries.width;
 		int boundaryTop = (int) boundaries.top;
-		int boundaryHeight = (int) boundaries.height;
+		int boundaryHeight = (int) boundaries.height;*/
 
-		for(int i=boundaryLeft;i<boundaryLeft+boundaryWidth;i++)
-		{
-			for(int j=boundaryTop;j<boundaryTop+boundaryHeight;j++)
-			{
-				Color pixel = iBackground.getPixel(i,j);
-				Color colourGreen = new Color(75,105,47);
-				Color colourGrey = new Color(58,68,78);
-				boolean place1 = isSimilar(pixel,colourGreen,40);
-				boolean place2 = isSimilar(pixel,colourGrey,40);
-				if(!(place1 || place2)) return false;
-			}
-		}
+		//for(int i=boundaryLeft;i<boundaryLeft+boundaryWidth;i++)
+		//{
+			//for(int j=boundaryTop;j<boundaryTop+boundaryHeight;j++)
+		//	{
+				Color pixel = iBackground.getPixel(x,y);
+				Color placementColor1 = selectedMap.getPlacementColor1();
+				Color placementColor2 = selectedMap.getPlacementColor2();
+				boolean place1 = isSimilar(pixel,placementColor1,50);
+				boolean place2 = isSimilar(pixel,placementColor2,50);
+				if(!isTrap && !(place1 || place2)) return false;
+				if(isTrap && (place1 || place2)) return false;
+		//	}
+		//}
 		
 		return true;
+
 	}
 	
 	boolean isSimilar(Color colour1, Color colour2, int accuracy)
@@ -276,9 +296,9 @@ class Tower extends ImageActor {
 	}
 	
 	
-	float getRange()
+	int getRange()
 	{
-		return range;
+		return (int) range;
 	}
 	/**
 	 * This function finds the nearest tower within range and returns it

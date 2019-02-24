@@ -30,14 +30,9 @@ public class ImageAct extends Actor {
 		imgTexture.setSmooth(true);
 		image = new Sprite(imgTexture);
 
-		//this.x = x;
-		//this.y = y;
-		
-
-			
 		obj = image;
 		setPosition = image :: setPosition;
-		//setPosition.accept(x, y);
+
 	}
 	
 	void calcMove(int minx, int miny, int maxx, int maxy, float time)

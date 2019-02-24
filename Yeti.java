@@ -5,8 +5,9 @@ public class Yeti extends NPC
 	{
 		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy3.png",background);
 		ID = "Yeti";
-		type = new int[]{0,0,0,0,0};
-		dropCount = 1;
+		type = new String[]{"electric","cryo"};
+		defaultType = new String[]{"electric","cryo"};
+		dropCount = 4;
 		//Difficulty adjusments (diffculty paramter)		
 		if(diffculty.equals("easy"))
 		{

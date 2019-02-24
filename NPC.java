@@ -1,11 +1,12 @@
 import org.jsfml.graphics.*;
 
- class NPC extends ImageActor //This consists of both Enemies and Friendlies enemy.java is redundant???
+ abstract class NPC extends ImageActor //This consists of both Enemies and Friendlies enemy.java is redundant???
 	{
 		String ID; 
 		int health;
 		int armour;
-		int[] type; //Element of enemy
+		String[] type; //Element of enemy -- 6 types {electric,star,cryo,warp,laser,galaxy} 1 indicates type
+		String[] defaultType;
 		int dropCount; //Number of drops when killed
 		private Image iBackground;
 		private Background background;
@@ -19,6 +20,7 @@ import org.jsfml.graphics.*;
 		private boolean firstLoop = false;
 		private  int screenWidth  = 1024;
 		private  int screenHeight = 768;
+		private boolean finalPath = false;
 		
 		NPC(float xPixelsPerSecond, float yPixelsPerSecond,int r, String textureFile, Background background)
 		{
@@ -41,14 +43,127 @@ import org.jsfml.graphics.*;
 			 //--->In windows//Call to actor .remove() in actor
 		}
 		
+		String getID()
+		{
+			return ID;
+		}
+		
+
 		void setArmour(int damage)
 		{
 			//Need to calculate new damage
 			armour -= damage;
 		}
 		
-		void setHealth(int damage)
+		int getArmour()
 		{
+			return armour;
+		}
+		
+		int getDropCount()
+		{
+			return dropCount;
+		}
+		
+		void setTypeNull()
+		{
+			type = new String[] {"null"};
+		}
+		
+		void setDefaultType()
+		{
+			type = defaultType;
+		}
+		
+		String getType()
+		{
+			String typeList = " ";
+			for(int i=0;i<type.length;i++)
+			{
+				typeList += type[i];
+			}
+			return typeList;
+		}
+		
+		float calculateDamage(String towerType)
+		{
+			float multiplier = 1;
+			
+			if(towerType.equals("electric"))
+			{
+				for(int i=0;i<type.length;i++)
+				{
+					if(type[i].equals("electric")) multiplier /= 2;
+					else if(type[i].equals("star")) multiplier *= 2;
+					else if(type[i].equals("warp")) multiplier *= 2;
+					else if(type[i].equals("laser")) multiplier *= 2;
+					else if(type[i].equals("galaxy")) multiplier *= 2;
+				
+				}
+			}
+			else if(towerType.equals("star"))
+			{
+				for(int i=0;i<type.length;i++)
+				{
+					if(type[i].equals("electric")) multiplier *= 2;
+					else if(type[i].equals("cryo"))  multiplier /= 2;
+					else if(type[i].equals("warp")) multiplier *= 2;
+					else if(type[i].equals("laser")) multiplier *= 2;
+					else if(type[i].equals("galaxy")) multiplier /= 2;
+				}
+			}
+			else if(towerType.equals("cryo"))
+			{
+				for(int i=0;i<type.length;i++)
+				{
+					if(type[i].equals("star"))  multiplier *= 2;
+					else if(type[i].equals("cryo"))  multiplier /= 2;
+					else if(type[i].equals("laser")) multiplier /= 2;
+					else if(type[i].equals("galaxy")) multiplier *= 2;
+				}
+			}
+			else if(towerType.equals("warp"))
+			{
+				for(int i=0;i<type.length;i++)
+				{
+					if(type[i].equals("electric")) multiplier /= 2;
+					else if(type[i].equals("star"))  multiplier *= 2;
+					else if(type[i].equals("laser")) multiplier *= 2;
+				}
+			}
+			else if(towerType.equals("laser"))
+			{
+				for(int i=0;i<type.length;i++)
+				{
+					if(type[i].equals("star"))  multiplier *= 2;
+					else if(type[i].equals("cryo"))  multiplier *= 2;
+					else if(type[i].equals("warp")) multiplier /= 2;
+					else if(type[i].equals("laser")) multiplier /= 2;
+					else if(type[i].equals("galaxy")) multiplier *= 2;
+				}
+			}
+			else if(towerType.equals("galaxy"))
+			{
+				for(int i=0;i<type.length;i++)
+				{
+					if(type[i].equals("electric")) multiplier /= 2;
+					else if(type[i].equals("star"))  multiplier *= 2;
+					else if(type[i].equals("cryo"))  multiplier *= 2;
+					else if(type[i].equals("warp")) multiplier /= 2;
+					else if(type[i].equals("laser")) multiplier /= 2;
+					else if(type[i].equals("galaxy")) multiplier *= 2;
+				}
+			}
+				System.out.println("Multiplier: " + multiplier);
+			return multiplier;
+		}
+		
+		void setHealth(String towerType, int damage)
+		{
+			System.out.println("DamageBefore: " + damage);
+			damage = (int) (damage * calculateDamage(towerType));
+			System.out.println("DamageAfter: " + damage);
+
 			if(armour>0)
 			{
 				if(armour<damage) health -= (damage-armour);	
@@ -94,7 +209,7 @@ import org.jsfml.graphics.*;
 				Color borderColour = background.getBorderColour();
 				Color borderIntersection = background.getIntersectionColour();
 				int accuracy = background.getAccuracy(); //How similar the colours colours are
-				//System.out.println("X: " + x + "Y " + y + "Colour: " + iBackground.getPixel((int)x,(int)y));
+			//	System.out.println("X: " + x + "Y " + y + "Colour: " + iBackground.getPixel((int)x,(int)y));
 				//System.out.println("highest: " +highest);
 				//System.out.println("lowest: " +lowest);			
 
@@ -112,9 +227,11 @@ import org.jsfml.graphics.*;
 					oldDirectionDistance[2] = directionDistance[2];
 					oldDirectionDistance[3] = directionDistance[3];
 					compass = tempCompass;
+				
 
-				//	System.out.println("Compass: " + compass);
-					//System.out.println("Highest: " + highest);
+				//System.out.println("Compass: " + compass);
+				//System.out.println("Highest: " + highest);
+				if(finalPath) lowest = 5;
 
 					firstLoop=false;
 				}//Constantly checks distance of the 2 closest sides until one side changes and then it reevaulates the lowest distance
@@ -137,7 +254,7 @@ import org.jsfml.graphics.*;
 						changeLowest(0,2,true);
 						changeLowest(2,0,true);
 					}
-					
+					if(finalPath) lowest = 5;
 				}
 		}
 		//returns true if colours are similar
@@ -151,6 +268,7 @@ import org.jsfml.graphics.*;
 		
 		void changeLowest(int compassOne, int compassTwo,boolean multiply)
 		{
+			//if(finalPath) return;
 			float tempLowest;
 			float tempLowest2;
 			//Only applies to intersection paths
@@ -186,7 +304,7 @@ import org.jsfml.graphics.*;
 				if(direction1.equals("left") && x-distance<=150) break; //THESE NUMBERS NEED TO BE SIZE OF THE MAP
 				if(direction1.equals("right") && x+distance>=855) break;
 				if(direction1.equals("up") && y-distance<=40) break;	
-				if(direction1.equals("down") && y+distance>=745) break;
+				if(direction1.equals("down") && y+distance>=765) break;
 				//Dealing with intersection code
 				intersection = false;
 				if(direction1.equals("left"))intersection = isSimilar(iBackground.getPixel((int)Math.round(x-distance),(int)Math.round(y)),borderIntersection,accuracy);
@@ -210,6 +328,15 @@ import org.jsfml.graphics.*;
 				{
 					die();
 				}
+				if(direction1.equals("left"))end = isSimilar(iBackground.getPixel((int)Math.round(x-distance),(int)Math.round(y)),endColor,5);
+				if(direction1.equals("right"))end = isSimilar(iBackground.getPixel((int)Math.round(x+distance),(int)Math.round(y)),endColor,5);
+				if(direction1.equals("up"))end = isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y-distance)),endColor,5);
+				if(direction1.equals("down"))end = isSimilar(iBackground.getPixel((int)Math.round(x),(int)Math.round(y+distance)),endColor,5);
+				if(end && distance < 40)
+				{
+					finalPath=true;
+				
+				}
 				
 				//Dealing with movement code
 				if(direction1.equals("left"))collision = isSimilar(iBackground.getPixel((int)Math.round(x-distance),(int)Math.round(y)),borderColour,accuracy);
@@ -227,7 +354,6 @@ import org.jsfml.graphics.*;
 			if(distance>highest && !compass.equals(oppositeDirection))  //Current direction is not oppositeSide
 			{
 				tempCompass = direction1;
-				//NEED AN IF STATEMENT FOR THIS (can be executed unless highest<=lowest, which its not at the start)
 				if(firstLoop)highest = distance;
 			}
 			if(distance<lowest  && !(distance<0) && compass.equals(" "))lowest = distance;

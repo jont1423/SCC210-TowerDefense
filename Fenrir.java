@@ -5,8 +5,9 @@ public class Fenrir extends NPC
 	{
 		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy4.png",background);
 		ID = "Fenrir";
-		type = new int[]{0,0,0,0,0};
-		dropCount = 1;
+		type = new String[]{"laser"};
+		defaultType = new String[]{"laser"};
+		dropCount = 3;
 		//Difficulty adjusments (diffculty paramter)		
 		if(diffculty.equals("easy"))
 		{
