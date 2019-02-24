@@ -35,8 +35,8 @@ class Pathing {
 	private String FontPath;	// Where fonts were found
 	private static String Title   = "Constellation";
 	private static RenderWindow window;
-	
-	private static String enemyFile[] = {"Enemies/Death/enemy1.png","Enemies/Death/enemy2.png","Enemies/Death/enemy3.png","Enemies/Death/enemy4.png","Enemies/Death/enemy5.png","Enemies/Death/enemy6.png"};
+																																																			//changed path
+	private static String enemyFile[] = {"Enemies/Death/enemy1.png","Enemies/Death/enemy2.png","Enemies/Death/enemy3.png","Enemies/Death/enemy4.png","Enemies/Death/enemy5.png","Enemies/Death/enemy6.png"};//#######################################################################
 	
 	private static String towerFile[] = {
 											"Towers/tower-1.png","Towers/tower-2.png","Towers/tower-3.png",
@@ -45,10 +45,10 @@ class Pathing {
 											"Towers/tower-11.png","Towers/tower-12.png","Towers/tower-13.png"};
 											
 	private static String tAnimFile[]  = {
-											"Towers/1-alien/1.png","Towers/2-miniship/1.png","Towers/3-minicannon/1.png",
-											"Towers/4-starship/1.png","Towers/5-startower/1.png","Towers/6-galaxygun/1.png",
-											"Towers/7-dreadnought/1.png","Towers/8-ionturret/1.png","Towers/9-warpship/1.png",
-											"Towers/tower-11.png","Towers/tower-12.png","Towers/tower-13.png"};
+											"Towers/1-alien/1.png","Towers/2-miniship/1.png","Towers/3-minicannon/1.png",//#######################################################################
+											"Towers/4-starship/1.png","Towers/5-startower/1.png","Towers/6-galaxygun/1.png",//#######################################################################
+											"Towers/7-dreadnought/1.png","Towers/8-ionturret/1.png","Towers/9-warpship/1.png",//#######################################################################
+											"Towers/tower-11.png","Towers/tower-12.png","Towers/tower-13.png"};//#######################################################################
 											
 	private static String backgroundFile[] = {"Maps/Map1.png","Maps/Map2.png","Maps/Map3.png"};
 	private static Background background;
@@ -558,25 +558,25 @@ class Pathing {
 				//Shooting of the tower
 				if (tower.getNearestEnemy(npcs) != null && tower.getFireRate() > tower.getCooldown() && tower.getPlaced() == true)
 				{					
-					Bullet b = new Bullet(tower.getBulletOriginX(),tower.getBulletOriginY(),0,"bullet.png",0,500f);
-					b.setTarget(tower.getNearestEnemy(npcs));
+					Bullet b = new Bullet(tower.getBulletOriginX(),tower.getBulletOriginY(),0,"bullet.png",0,500f);//#######################################################################
+					b.setTarget(tower.getNearestEnemy(npcs));//#######################################################################
 					
 					
-						if((tower.getFrame() < b.calculateDistanceToTarget())&&(tower.getFrame() < 896)){
-							tower.setFrame(tower.getFrame()+128);
-						}else{
-							tower.setFrame(0);
-						}
-					tower.anim(tower.getFrame(),115,2);
+						if((tower.getFrame() < b.calculateDistanceToTarget())&&(tower.getFrame() < 896)){//#######################################################################
+							tower.setFrame(tower.getFrame()+128);//#######################################################################
+						}else{//#######################################################################
+							tower.setFrame(0);//#######################################################################
+						}//#######################################################################
+					tower.anim(tower.getFrame(),115,2);//#######################################################################
 					
 					actors.add(b);
 					bullets.add(b);
 					tower.setBullet(b);
 					b.calculateDistanceToTarget();
 					tower.setFireRate();
-				}else if(tower.getPlaced()==true){
-				tower.anim(0,115,2);
-				}
+				}else if(tower.getPlaced()==true){//#######################################################################
+				tower.anim(0,115,2);	//#######################################################################for when they're idle
+				}//#######################################################################
 				
 				
 				
@@ -642,7 +642,7 @@ class Pathing {
 					int random = r.nextInt(enemyFile.length);
 					Gremlin enemy = new Gremlin(134f, 134f, 0,difficulty, selectedMap);
 					npcs.add(enemy);
-					enemy.anim(0,16,1);
+					enemy.anim(0,16,1);//#######################################################################
 					//npcs.add(new NPC(134f,134f,0,enemyFile[random], selectedMap));
 					
 					actors.add(enemy);
@@ -764,7 +764,7 @@ class Pathing {
 								// checking if the place we are trying to place the tower is valid
 								if (towerToPlace.placementCheck(mouseLoc.x, mouseLoc.y, towerToPlace.getImg().getGlobalBounds(), towers)) {
 									// updating the tower to acknowledge it has been placed
-									towerToPlace.changeSpriteImage(tAnimFile[selectedTower]);
+									towerToPlace.changeSpriteImage(tAnimFile[selectedTower]);//#######################################################################
 									towerToPlace.setPlaced(true);
 								
 									
