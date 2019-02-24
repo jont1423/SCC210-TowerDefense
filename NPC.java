@@ -21,6 +21,7 @@ import org.jsfml.graphics.*;
 		private  int screenWidth  = 1024;
 		private  int screenHeight = 768;
 		private boolean finalPath = false;
+	 	private int frame = 0;// Frame used in animation
 		
 		NPC(float xPixelsPerSecond, float yPixelsPerSecond,int r, String textureFile, Background background)
 		{
@@ -34,6 +35,15 @@ import org.jsfml.graphics.*;
 			this.health = health;
 			this.armour = armour;
 		}
+	 
+	 	void setFrame(int i){
+			frame = i;
+		}
+		
+		int getFrame(){
+			return frame;
+		}
+	 
 		void die()
 		{
 			health=0;
