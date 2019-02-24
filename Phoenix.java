@@ -3,7 +3,7 @@ public class Phoenix extends NPC
 {
 	public Phoenix(float xPixelsPerSecond, float yPixelsPerSecond,int r,String diffculty, Background background)
 	{
-		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/enemy5.png",background);
+		super(xPixelsPerSecond, yPixelsPerSecond, r, "Enemies/Death/enemy5.png",background);
 		ID = "Phoenix";
 		type = new String[]{"star","warp"};
 		defaultType = new String[]{"star","warp"};
