@@ -24,20 +24,18 @@ public class GameWindow {
 	private static int screenWidth = 1024;
 	private static int screenHeight = 768;
 	
-	private static String Title = "Tower Defense";
+	private static String Title = "Constellation";
 
 	private static BackgroundMusic BGM;
 	private static Mouse mouseMov;
 	private static Vector2i mouseLoc;
 	private static MainMenu mainMenu;
 	private static StoryMode storyMode;
+	private static QuitScreen quitScreen;
+	private static ChooseLevDif chooseLevel, chooseDif;
 	
-	private boolean mainMenuOn = true;
-	private boolean mainMenuFunc = true;
-	private boolean storyModeOn = false;
-	private boolean storyModeFunc = false;
-	private boolean scenesOn = false;
-	private boolean alertScreenOn = false;
+	private boolean mainMenuOn = true, mainMenuFunc = true, storyModeOn = false, storyModeFunc = false,
+					scenesOn = false, alertScreenOn = false, chooseLevOn = false, chooseDifOn = false;
 	
 	public GameWindow() {
 		BGM = new BackgroundMusic();
@@ -45,6 +43,9 @@ public class GameWindow {
 		
 		mainMenu = new MainMenu();
 		storyMode = new StoryMode();
+		quitScreen = new QuitScreen();
+		chooseLevel = new ChooseLevDif("Level");
+		chooseDif = new ChooseLevDif("Difficulties");
 	}
 	
 	public void run () {		
@@ -62,14 +63,16 @@ public class GameWindow {
 			window.clear(Color.WHITE);
 			
 			// Update the display with any changes
-
+		
 			count = mainMenu.display(window, mainMenuOn, count);			//Draw mainmenu
 			storyMode.display(window, count, storyModeOn, scenesOn);
-			
-			window.display();
+			quitScreen.display(window, alertScreenOn);
+			chooseLevel.display(window, chooseLevOn, "level");		
+			chooseDif.display(window, chooseDifOn, "difficulties");		
 
 			//check mouse coordinates in each frame
 			mouseLoc = mouseMov.getPosition(window);
+			//System.out.println(mouseLoc);
 		
 			// Handle any events
 			for (Event event : window.pollEvents()) {
@@ -77,6 +80,7 @@ public class GameWindow {
 					// the user pressed the close button
 					window.close();
 				}
+				
 				//Main Menu Event 
 				if (mainMenuFunc) {
 					//*************** New Main Menu Event ****************
@@ -84,24 +88,35 @@ public class GameWindow {
 						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
 							mainMenuOn = false;
 							mainMenuFunc = false;
-							storyModeOn = true;
-							storyModeFunc = true;
+							chooseDifOn = true;
+							
+							//storyModeOn = true;
+							//storyModeFunc = true;
 						}
 					}
 					
-					if (mainMenu.continueEvent(mouseLoc)) {}
+					if (mainMenu.continueEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED)
+							System.out.println("Continue Clicked!");
+					}
 						
-					if (mainMenu.quickPlayEvent(mouseLoc)) {}
+					if (mainMenu.quickPlayEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							mainMenuOn = false;
+							mainMenuFunc = false;
+							chooseLevOn = true;
+						}
+					}
 					
 					if (mainMenu.exitEvent(mouseLoc)) {
 						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED)
-							window.close();
+							alertScreenOn = true;	
 					}
 				}
 								
 				
 				//Story Mode Event
-				if (storyModeFunc) {					
+				if (storyModeFunc) {	
 					for (int i=0; i<2; i++) {
 						if (storyMode.buttonsEvent(mouseLoc, i)) {						//New Code****
 							if (mouseMov.isButtonPressed(Mouse.Button.LEFT)) {
@@ -112,31 +127,76 @@ public class GameWindow {
 									scenesOn = true;
 								}
 								else {
-									QuestionScreen q = new QuestionScreen();
 									alertScreenOn = true;
-									//try {window.setActive(false);}
-									//catch (ContextActivationException e) {System.out.println(e);}
-									if (q.run() == 0) {
-										alertScreenOn = false;
-										storyModeOn = false;
-										storyModeFunc = false;
-										mainMenuOn = true;
-										mainMenuFunc = true;
-										//try {window.setActive(true);}
-										//catch (ContextActivationException e) {System.out.println(e);}
-									}
-									else {
-										System.out.println("Alert screen closed.");
-										alertScreenOn = false;
-										//try {window.setActive(false);}
-										//catch (ContextActivationException e) {System.out.println(e);}	
-									}
+									storyModeFunc = false;
 								}
 							}
 						}
 					}
 				}
+				
+				//Pop-up alert Event
+				if (alertScreenOn) {
+					mainMenuFunc = false;
+					storyModeFunc = false;
+					if (quitScreen.yesEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							alertScreenOn = false;
+							if (mainMenuOn)
+								window.close();
+							else {
+								mainMenuOn = true;
+								mainMenuFunc = true;
+								storyModeOn = false;
+								storyModeFunc = false;
+							}
+						}
+					}
+
+					if (quitScreen.noEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							alertScreenOn = false;
+							if (mainMenuOn)
+								mainMenuFunc = true;
+							else if (storyModeOn)
+								storyModeFunc = true;
+						}
+					}
+				}
+				
+				if (chooseLevOn) {
+					for (int i=0; i<5; i++) {
+						if (chooseLevel.mapEvent(mouseLoc, i)) {
+							if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {}
+						}
+					}
+					if (chooseLevel.backButtonEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							chooseLevOn = false;
+							mainMenuOn = true;
+							mainMenuFunc = true;
+						}
+					}
+				}
+				
+				if (chooseDifOn) {
+					for (int i=0; i<3; i++) {
+						if (chooseDif.difficultiesEvent(mouseLoc, i)) {
+							if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {}
+						}
+					}
+					if (chooseDif.backButtonEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							chooseDifOn = false;
+							mainMenuOn = true;
+							mainMenuFunc = true;
+						}
+					}
+				}
 			}
+			
+			window.display();
+
 		}
 	}
 
