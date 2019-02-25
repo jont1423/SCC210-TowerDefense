@@ -56,11 +56,12 @@ public class Word extends Actor {
 		
 	}
 	
-	
-	void calcMove(int minx, int miny, int maxx, int maxy, float time)
+	public void setFont(String font)
 	{
-		
+		FontFile = font;
 	}
+	
+	public void setColor(Color c) {text.setColor(c);}
 	
 	public String scene1(int dialouge) {
 		int StringSize = 24;
@@ -280,4 +281,5 @@ public class Word extends Actor {
 		}
 		return sub[dialouge];
 	}
+	
 }

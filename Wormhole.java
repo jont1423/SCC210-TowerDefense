@@ -4,6 +4,8 @@ public class Wormhole extends Tower
 	{
 		super(x,y,r,"Towers/tower-12.png",background,placed);
 		ID = "Wormhole";
+		cost = 350;
+		upgradeCost = 0;
 		trapHealth =  50;
 		baseDamage = 50;
 		damage = baseDamage;

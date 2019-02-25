@@ -26,6 +26,7 @@ abstract class Tower extends ImageActor {
 	boolean isTrap;
 	int trapHealth;
 	int cost;
+	int upgradeCost;
 
 	float range;
 	private int angleOffset = 90;
@@ -33,6 +34,7 @@ abstract class Tower extends ImageActor {
 	private NPC nearest;
 	private Bullet bullet;
 	private Clock fireRate = new Clock();
+	private Clock animationTime = new Clock();
 	int cooldown; //Millseconds before turret can refire
 	private Vector2f bulletOrigin = new Vector2f(x+2f,y-19f);
 	private float bulletOriginX; //Where bullet spawns
@@ -90,6 +92,16 @@ abstract class Tower extends ImageActor {
 		return frame;
 	}
 	
+	float getAnimationTime()
+	{
+		return animationTime.getElapsedTime().asMilliseconds();
+	}
+	
+	void resetAnimationTime()
+	{
+		animationTime.restart();
+	}
+	
 	void setBullet(Bullet bullet)
 	{
 		this.bullet = bullet;
@@ -105,6 +117,11 @@ abstract class Tower extends ImageActor {
 		return killCount;
 	}
 	
+	void setKillCount()
+	{
+		killCount++;
+	}
+	
 	int getRank()
 	{
 		return rank;
@@ -113,6 +130,11 @@ abstract class Tower extends ImageActor {
 	int getCost()
 	{
 		return cost;
+	}
+	
+	int getUpgradeCost()
+	{
+		return upgradeCost;
 	}
 	
 	void setDamage(float multiplier)
@@ -327,7 +349,7 @@ abstract class Tower extends ImageActor {
 		// setting the nearest enemy to null
 		//nearest = null;
 		
-		if(nearest==null)
+		if(nearest==null || nearest.getIsDead())
 		{
 			// looping through all the enemies
 			for (NPC enemy : enemies) {

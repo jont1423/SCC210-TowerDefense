@@ -3,10 +3,11 @@ public class WarpShip extends Tower
 {
 	public WarpShip(float x, float y, int r, Background background, boolean placed)
 	{
-		super(x,y,r,"Towers/tower-8.png",background,placed);
+		super(x,y,r,"Towers/tower-9.png",background,placed);
 		ID = "Warp Ship";
 		cost = 900;
-		baseDamage = 5;
+		upgradeCost = 1350;
+		baseDamage = 55;
 		damage = baseDamage;
 		baseCooldown = 50;
 		cooldown = baseCooldown;
@@ -17,17 +18,11 @@ public class WarpShip extends Tower
 	
 	void upgrade()
 	{
-		rank++;
+		if(rank!=1)rank++;
 		if(rank==1)
 		{
-			baseDamage = 10;
+			baseDamage = 90;
 			damage = baseDamage;
-			//Could also change firerate and type
-			//Also change spritesheet
-		}
-		else if(rank==2)
-		{
-			
 		}
 	}
 }
