@@ -16,48 +16,35 @@ import org.jsfml.graphics.*;
 class Pathing {
 	private static int screenWidth  = 1024;
 	private static int screenHeight = 768;
-	//
-	// The Java install comes with a set of fonts but these will
-	// be on different filesystem paths depending on the version
-	// of Java and whether the JDK or JRE version is being used.
-	//
-	private static String JavaVersion = 
-		Runtime.class.getPackage( ).getImplementationVersion( );
-	private static String JdkFontPath =
-		"C:\\Program Files\\Java\\jdk" + JavaVersion +
-		"\\jre\\lib\\fonts\\";
-	private static String JreFontPath =
-		"C:\\Program Files\\Java\\jre" + JavaVersion +
-		"\\lib\\fonts\\";
 
-	private static int fontSize     = 48;
-	private static String FontFile  = "LucidaSansRegular.ttf";
-	private String FontPath;	// Where fonts were found
 	private static String Title   = "Constellation";
 	private static RenderWindow window;
-	
-	private static String enemyFile[] = {"Enemies/enemy.png","Enemies/enemy2.png","Enemies/enemy3.png","Enemies/enemy4.png","Enemies/enemy5.png","Enemies/enemy6.png"};
+	private static String enemyFile[] = {"Enemies/Death/enemy.png","Enemies/Death/enemy2.png","Enemies/Death/enemy3.png","Enemies/Death/enemy4.png","Enemies/Death/enemy5.png","Enemies/Death/enemy6.png"};
 	private static String towerFile[] = {
 											"Towers/tower-1.png","Towers/tower-2.png","Towers/tower-3.png",
 											"Towers/tower-4.png","Towers/tower-5.png","Towers/tower-6.png",
 											"Towers/tower-7.png","Towers/tower-8.png","Towers/tower-9.png","Towers/tower-10.png",
 											"Towers/tower-11.png","Towers/tower-12.png","Towers/tower-13.png"};
+	private static String tAnimFile[]  = {
+											"Towers/1-alien/1.png","Towers/2-miniship/1.png","Towers/3-minicannon/1.png",
+											"Towers/4-starship/1.png","Towers/5-startower/1.png","Towers/6-galaxygun/1.png",
+											"Towers/7-dreadnought/1.png","Towers/8-ionturret/1.png","Towers/9-warpship/1.png","Towers/tower-10.png",
+											"Towers/tower-11.png","Towers/tower-12.png","Towers/tower-13.png"};
+											
 	private static String backgroundFile[] = {"Maps/Map1.png","Maps/Map2.png","Maps/Map3.png","Maps/Map4.png","Maps/Map5.png"};
 	private static Background background;
 	private ArrayList<NPC> npcs = new ArrayList<NPC>( );
 	private ArrayList<Tower> towers = new ArrayList<Tower>( );
-	//private ArrayList<List<Actor>> actors = new ArrayList<List<Actor>>( );
 	private ArrayList<Actor> actors = new ArrayList<Actor>( );
 	private ArrayList<Bullet> bullets = new ArrayList<Bullet>( );
 	private ArrayList<Item> items = new ArrayList<Item>( );
-	//private ArrayList<Word> Text = new ArrayList<Word>( );
 	
 	//All Maps
 	//OriginX,OriginY,Rotation,filename,StartingArea,BorderColor,IntersectionColor,placementColor1,placementColor2,accuracy
-	private final Background map1 = new Background(512,384,0, backgroundFile[0],new IntRect(177,99,1,29),new Color(255,0,157),new Color(255,255,255),new Color(75,105,47),new Color(58,68,78),20);
+	private final Background map1 = new Background(512,384,0, backgroundFile[0],new IntRect(177,100,1,28),new Color(255,0,157),new Color(255,255,255),new Color(75,105,47),new Color(58,68,78),20);
 	private final Background map2 = new Background(512,384,0, backgroundFile[1],new IntRect(233,51,26,1),new Color(124,0,20),new Color(126,57,140),new Color(75,255,255),new Color(78,163,147),20);
 	private final Background map3 = new Background(512,384,0, backgroundFile[2],new IntRect(818,123,1,29),new Color(172,49,49),new Color(255,255,255),new Color(155,173,183),new Color(164,119,98),20);
-	private final Background map4 = new Background(512,384,0, backgroundFile[3],new IntRect(333,27,27,1),new Color(135,18,20),new Color(255,255,255),new Color(156,102,97),new Color(103,255,37),20);
+	private final Background map4 = new Background(512,384,0, backgroundFile[3],new IntRect(335,27,25,1),new Color(135,18,20),new Color(255,255,255),new Color(156,102,97),new Color(103,255,37),20);
 	private final Background map5 = new Background(512,384,0, backgroundFile[4],new IntRect(260,39,27,1),new Color(255,255,255),new Color(0,0,0),new Color(187,244,131),new Color(102,57,49),20);
 	private Background selectedMap;
 	
@@ -79,13 +66,15 @@ class Pathing {
 	private int enemiesAlive = 0; //Number of enemies to spawn in
 	private int enemiesDead = 0; //Number of enemies dead
 	private int scrap;
-	private final int baseScrapValue = 500;
+	private final int baseScrapValue = 6;
 	private int scrapValue = baseScrapValue;
 	private int damageMultiplier;
 	private int[] enemyComposition = new int[6]; //Each index represents the number of that enemy for the wave
 	private int noOfEnemyTypes;
+	private int count = 0;
 	
 	private Word gameInfo = new Word();
+	private Word costUpgradeInfo = new Word();
 	private Word towerInfo = new Word();
 	private Word enemyInfo = new Word();
 	private ArrayList<Word> itemInfo = new ArrayList<Word>();
@@ -96,26 +85,35 @@ class Pathing {
 	private Word piercingText = null;
 	private Word fortuneText = null;
 	
-	private Clock damageTime; //Keep track of damage boost time
-	private Clock firerateTime; //Keep track of fire rate
-	private Clock piercingTime; //Keep track of piercing duration
-	private Clock fortuneTime; //Keep track of money boost
+	private Clock damageTime; //Keeps track of damage boost time
+	private Clock firerateTime; //Keeps track of fire rate
+	private Clock piercingTime; //Keeps track of piercing duration
+	private Clock fortuneTime; //Keeps track of money boost
 	private final int powerDuration = 15;
 	
 	private int selectedTower; //number represented tower selected
+	
+	private BackgroundMusic BGM;
 
-	//Maybe an actor one for just drawing???
-
+	/**
+	* Constructor for intialising variables using the save file
+	* @param r The windows the game is displayed on
+	* @param s The save file used to determine what the state the game is in
+	*/
 	Pathing(RenderWindow r, Save s)
 	{
 		window = r;
 		currentLevel = s.getCurrLvl();
 		round = s.getCurrRound();
 		difficulty = s.getDiff();
-		scrap = 250;
+		BGM = new BackgroundMusic();
+		BGM.play();
+		scrap = 300;
 		displayInfo();
 	}
-	
+	/**
+	* Starts wave timer
+	*/
 	public void startTime()
 	{
 		if(wTime==null)
@@ -123,7 +121,11 @@ class Pathing {
 			wTime = new Clock();
 		}
 	}
-	
+	/**
+	* Initialises variables depending on difficuly and current level/map
+	* @param difficulty The difficulty of the game
+	* @param currentLevel The level the player is on
+	*/
 	public void setup(String difficulty, int currentLevel)
 	{
 		
@@ -151,14 +153,14 @@ class Pathing {
 		}
 		else if(currentLevel == 4)
 		{
-			maxRound = 40;
+			maxRound = 30;
 			selectedMap = map4;
 			noOfEnemyTypes = 6;
 			actors.add(map4);
 		}
 		else if(currentLevel == 5)
 		{		
-			maxRound = 50;
+			maxRound = 30;
 			selectedMap = map5;
 			noOfEnemyTypes = 6;
 			actors.add(map5);
@@ -166,14 +168,18 @@ class Pathing {
 		else
 		{
 			//Sandbox map
-			System.out.println("Sandbox Map");
+			maxRound = 500;
+			selectedMap = map5;
+			noOfEnemyTypes = 6;
+			actors.add(map5);
 		}
 		
 		if(difficulty.equals("easy"))
 		{
 			baseHealth = 200;
 			roundTimer = 5f; 
-			enemyCount = 50;
+			enemyCount = 20 + (5 * round);
+			//Randomly generates how many of each type of enemy
 			for(int i=0;i<enemyCount;i++)
 			{
 				Random r = new Random();
@@ -183,8 +189,8 @@ class Pathing {
 		else if(difficulty.equals("intermediate"))
 		{
 			baseHealth = 150;
-			roundTimer = 45f; 
-			enemyCount = 500;
+			roundTimer = 5f; 
+			enemyCount = 25 + (10 * round);
 			for(int i=0;i<enemyCount;i++)
 			{
 				Random r = new Random();
@@ -194,8 +200,19 @@ class Pathing {
 		else if(difficulty.equals("hard"))
 		{
 			baseHealth = 100;
-			roundTimer = 30f; 
-			enemyCount = 1000;
+			roundTimer = 5f; 
+			enemyCount = 30 + (15 * round);
+			for(int i=0;i<enemyCount;i++)
+			{
+				Random r = new Random();
+				enemyComposition[r.nextInt(noOfEnemyTypes)]++;
+			}
+		}
+		else
+		{
+			baseHealth = 2000;
+			roundTimer = 5f; 
+			enemyCount = 10000;
 			for(int i=0;i<enemyCount;i++)
 			{
 				Random r = new Random();
@@ -203,17 +220,14 @@ class Pathing {
 			}
 		}
 	}
-	
-	public ArrayList getActors()
-	{
-		return actors;
-	}
-	
+	/**
+	* Displays information about the level on the 'stats' bar and timers for power ups
+	*/
 	public void displayInfo()
 	{
-
 		//Displays game information
 		float ySpacing = 70f;
+		gameInfo.setFont("ARCADECLASSIC.ttf");
 		gameInfo.setWord("Wave\n" + round +
 							"\n\nBase Health\n" + baseHealth +
 							"\n\nNext round in\n" + Math.round(roundTimer) + " Seconds"+
@@ -226,7 +240,7 @@ class Pathing {
 			gameInfo.setLocation(xSpacing,ySpacing);
 			actors.add(gameInfo);
 		}
-			
+					
 		//Updates the damage timer on screen
 		if(damageTime != null)
 		{
@@ -289,13 +303,14 @@ class Pathing {
 			}
 
 		}
+		//Updates the piercing timer on screen
 		if(piercingTime != null)
 		{
 			ySpacing = 670f;
 			if(piercingText == null)
 			{
 				piercingText = new Word();
-				piercingText.setWord("Fire Rate Up\n" + (int) (powerDuration-piercingTime.getElapsedTime().asSeconds()) + " Seconds",Color.WHITE,16);
+				piercingText.setWord("Alien Type NULL\n" + (int) (powerDuration-piercingTime.getElapsedTime().asSeconds()) + " Seconds",Color.WHITE,16);
 				piercingText.setLocation(xSpacing,ySpacing);
 				itemInfo.add(piercingText);
 				actors.add(piercingText);
@@ -303,7 +318,7 @@ class Pathing {
 			}
 			else if((powerDuration-piercingTime.getElapsedTime().asSeconds())>0)
 			{
-				piercingText.setWord("Fire Rate Up\n" + (int) (powerDuration-piercingTime.getElapsedTime().asSeconds()) + " Seconds",Color.WHITE,16);
+				piercingText.setWord("Alien Type NULL\n" + (int) (powerDuration-piercingTime.getElapsedTime().asSeconds()) + " Seconds",Color.WHITE,16);
 			}
 			else
 			{
@@ -317,6 +332,7 @@ class Pathing {
 				piercingText = null;
 			}
 		}
+		//Updates the fortune timer on screen
 		if(fortuneTime != null)
 		{
 			ySpacing = 705f;
@@ -343,6 +359,9 @@ class Pathing {
 		}
 	}
 	
+	/**Displays information relating to the selected tower on screen
+	* @param t The tower that the information will be about
+	*/
 	public void displayInfo(Tower t)
 	{
 		float ySpacing = 305f;
@@ -358,10 +377,13 @@ class Pathing {
 		{
 			towerInfo.setLocation(xSpacing,ySpacing);
 			actors.add(towerInfo);
-		}
+		}//Displays range of the selected tower
+		t.renderBorder(window, false);
 	}
 	
-	//NPC info cant be displayed at the same time as a tower
+	/**Displays information relating to the selected NPC on screen
+	* @param n The NPC that the information will be about
+	*/
 	public void displayInfo(NPC n)
 	{	
 		float ySpacing = 305f;
@@ -375,42 +397,56 @@ class Pathing {
 			actors.add(enemyInfo);
 		}
 	}
+	/**Displays the cost and upgrade cost of the selected tower on screen
+	* @param towerName The tower whose cost will be displayed
+	*/
+	public void displayCost(String towerName)
+	{
+		float ySpacing = 132f;
+		if(towerName.equals("alien")) costUpgradeInfo.setWord("Cost 50 \nUpgrade 100",Color.WHITE,18);
+		if(towerName.equals("miniship")) costUpgradeInfo.setWord("Cost 100 \nUpgrade 225",Color.WHITE,18);
+		if(towerName.equals("minicannon")) costUpgradeInfo.setWord("Cost 150 \nUpgrade 250",Color.WHITE,18);
+		if(towerName.equals("starship")) costUpgradeInfo.setWord("Cost 250 \nUpgrade 450",Color.WHITE,18);
+		if(towerName.equals("startower")) costUpgradeInfo.setWord("Cost 450 \nUpgrade 750",Color.WHITE,18);
+		if(towerName.equals("galaxygun")) costUpgradeInfo.setWord("Cost 750 \nUpgrade 900",Color.WHITE,18);
+		if(towerName.equals("dreadnought")) costUpgradeInfo.setWord("Cost 1000 \nUpgrade 1500",Color.WHITE,18);
+		if(towerName.equals("ionturret")) costUpgradeInfo.setWord("Cost 3000 \nUpgrade 4500",Color.WHITE,18);
+		if(towerName.equals("warship")) costUpgradeInfo.setWord("Cost 5000 \nUpgrade 6350",Color.WHITE,18);
+		if(towerName.equals("electricswarm")) costUpgradeInfo.setWord("Cost 25",Color.WHITE,18);
+		if(towerName.equals("wormhole")) costUpgradeInfo.setWord("Cost 400",Color.WHITE,18);
+		if(towerName.equals("blackhole")) costUpgradeInfo.setWord("Cost 650",Color.WHITE,18);
 	
+		if(!actors.contains(costUpgradeInfo))
+		{
+			costUpgradeInfo.setLocation(885f, 615f);
+			actors.add(costUpgradeInfo);
+		}
+	}
+	/**
+	* Generates an item and drops it at the dead NPC's position
+	* @param npc The npc where the item will be generated at
+	*/
 	void generateItem(NPC npc)
 	{
 		Random r = new Random();
-		int number = r.nextInt(100);
+		int number = r.nextInt(200);
 		int itemNumber;
-		//85% chance of scrap drop
-		if(number < 26)
-		{
-			//effect = 0;
-			itemNumber = 1;
-		} //3% chance for powerups
-		else if(number > 25 && number < 51)
-		{
-			itemNumber = 4;
-		}
-		else if(number > 50 && number < 76)
-		{
-			//effect = 2;
-			itemNumber = 2;
-		}
-		else if(number > 75 && number < 101)
-		{
-			//effect = 3;
-			itemNumber = 3;
-		}
-		else //6% chance for double money
-		{
-			//effect = 4;
-			itemNumber = 4;
-		}
-		Item drop = new Item(npc.getX(),npc.getY(),itemNumber);
+		//95% chance of scrap drop
+		if(number < 195) itemNumber = 0;
+		//1% chance for powerups
+		else if(number > 194 && number < 196) itemNumber = 1;
+		else if(number > 195 && number < 197)	itemNumber = 2;
+		else if(number > 196 && number < 198)	itemNumber = 3;
+		//1% chance for double money
+		else itemNumber = 4;
+		
+		Item drop = new Item(npc.x,npc.y,itemNumber);
 		items.add(drop);
 		actors.add(drop);
 	}
-	
+	/**
+	* Updates the round timer
+	*/
 	public void updateTimers()
 	{
 		if(wTime != null) roundTimer -= wTime.restart().asSeconds();
@@ -418,57 +454,50 @@ class Pathing {
 
 	
 	public void run () {
-
-		//
-		// Check whether we're running from a JDK or JRE install
-		// ...and set FontPath appropriately.
-		//
-		if ((new File(JreFontPath)).exists( )) FontPath = JreFontPath;
-		else FontPath = JdkFontPath;
 				
-		window.setFramerateLimit(60); // Avoid excessive updates
+		window.setFramerateLimit(60);
 		
 		//Buttons
 		ButtonsIMG = new ImageAct[towerFile.length];
 		for (int i=0; i<towerFile.length; i++)
 			ButtonsIMG[i] = new ImageAct(towerFile[i]);
 			
-		ButtonsIMG[0].setLocation(885f, 77f);
-		ButtonsIMG[1].setLocation(949f, 77f);
-		ButtonsIMG[2].setLocation(885f, 138f);
-		ButtonsIMG[3].setLocation(949f, 138f);
-		ButtonsIMG[4].setLocation(885f, 197f);
-		ButtonsIMG[5].setLocation(949f, 197f);
-		ButtonsIMG[6].setLocation(885f, 256f);
-		ButtonsIMG[7].setLocation(949f, 256f);
-		ButtonsIMG[8].setLocation(885f, 317f);
-		ButtonsIMG[9].setLocation(949f, 317f);
-		ButtonsIMG[10].setLocation(888f, 449f); //Traps start
-		ButtonsIMG[11].setLocation(950f, 449f);
-		ButtonsIMG[12].setLocation(888f, 508f);
-		
+		float xSpacing = 895f;
+		float ySpacing = 85f;
+		for(int i=0; i<towerFile.length;i++)
+		{
+			ButtonsIMG[i].setLocation(xSpacing,ySpacing);
+			if(i!=0 && i%2==1)ySpacing += 60;
+			if(xSpacing==895f) xSpacing = 955f;
+			else xSpacing = 895f;
+			if(i==9) ySpacing = 455f;
+		}
+
 		rect = new GenButton[towerFile.length];
 		for(int i=0; i<towerFile.length; i++)
 			rect[i] = new GenButton(40, 43, Color.GREEN, 0);
 		
-		rect[0].setLocation((float) 888, (float) 82);	
-		rect[1].setLocation((float) 950, (float) 82);	
-		rect[2].setLocation((float) 888, (float) 142);	
-		rect[3].setLocation((float) 950, (float) 142);	
-		rect[4].setLocation((float) 888, (float) 202);	
-		rect[5].setLocation((float) 950, (float) 202);	
-		rect[6].setLocation((float) 888, (float) 263);	
-		rect[7].setLocation((float) 950, (float) 263);	
-		rect[8].setLocation((float) 888, (float) 323);	
-		//rect[9].setLocation((float) 950, (float) 323);	
-		rect[10].setLocation((float) 888, (float) 449); //Traps start	
-		rect[11].setLocation((float) 950, (float) 449);	
-		rect[12].setLocation((float) 888, (float) 509);	
-	
-		Clock time = new Clock(); //Need to be done somewhere (as the game is running)
+		xSpacing = 888f;
+		ySpacing = 82f;
+		for(int i=0; i<towerFile.length;i++)
+		{
+
+			if(i!=9)rect[i].setLocation(xSpacing,ySpacing);
+			if(i!=0 && i%2==1)ySpacing += 60;
+			if(xSpacing==888f) xSpacing = 950f;
+			else xSpacing = 888f;
+			if(i==9)
+			{
+				ySpacing = 449f;
+			}
+			
+		}	
+		Clock time = new Clock(); //Timer used for enemy spawns
 		Clock frameTime = new Clock(); //Movement is independent of framerate
 	
 		Tower towerToPlace = null; //Turret at cursor positon 
+		Tower statTower = null; //Display stats of this turret 
+		NPC statEnemy = null; //Display stats of this enemy 
 		Stack<Actor> toRemove = new Stack<>();
 		Stack<Tower> towerToRemove = new Stack<>();
 		Stack<NPC> npcToRemove = new Stack<>();
@@ -476,7 +505,6 @@ class Pathing {
 	
 		while (window.isOpen( )) 
 		{
-
 			float elapsedTime = frameTime.restart().asSeconds();
 			//System.out.println("ElapsedTime :" + elapsedTime);
 			
@@ -484,7 +512,7 @@ class Pathing {
 			window.clear(Color.WHITE);
 			
 			mouseLoc = mouseMov.getPosition(window);
-			//Actors displayed first due to map
+			//Actors displayed first due to map being an actor
 			for (Actor actor : actors) {
 				if (actor.needsRemoving(screenWidth, screenHeight))
 					toRemove.push(actor);
@@ -492,11 +520,11 @@ class Pathing {
 				actor.performMove( );
 				actor.draw(window);						
 			}
-			//System.out.println("WaveTimer " + roundTimer);
-			//System.out.println("WaveTimerRounded " + Math.round(roundTimer));
+
 			displayInfo();
 			updateTimers();
-			//System.out.println("Scrap value: " + scrap);
+			if(statTower!=null) displayInfo(statTower);
+			if(statEnemy!=null) displayInfo(statEnemy);
 
 			//Make sure the timer can only go down to 0
 			if(roundTimer<=0)
@@ -506,24 +534,23 @@ class Pathing {
 			
 			}
 			//New wave setup
-			if(enemiesDead == enemyCount)
+			if(enemiesDead == enemyCount && round == maxRound) return;
+			else if(enemiesDead == enemyCount)
 			{
 				if(difficulty.equals("easy"))
 				{
-					//Need to change this
-					enemyCount = 50;
-					roundTimer = 5;
+					enemyCount = 20 + (5 * round);
+					roundTimer = 30;
 					for(int i=0;i<enemyCount;i++)
 					{
 						Random r = new Random();
 						enemyComposition[r.nextInt(noOfEnemyTypes)]++;
-						System.out.print("Pre-Gremlins: " + enemyComposition[0]);
 					}
 				}
-				if(difficulty.equals("medium")) 
+				else if(difficulty.equals("medium")) 
 				{
-					enemyCount = 500;
-					roundTimer = 5;
+					enemyCount = 30 + (5 * round);;
+					roundTimer = 20;
 					for(int i=0;i<enemyCount;i++)
 					{
 						Random r = new Random();
@@ -531,10 +558,21 @@ class Pathing {
 					}
 			
 				}
-				if(difficulty.equals("hard"))
+				else if(difficulty.equals("hard"))
 				{
-					enemyCount = 1000;
-					roundTimer = 5;
+					enemyCount = 50 + (5 * round);;
+					roundTimer = 10;
+					for(int i=0;i<enemyCount;i++)
+					{
+						Random r = new Random();
+						enemyComposition[r.nextInt(noOfEnemyTypes)]++;
+					}
+				}
+				else
+				{
+					baseHealth = 2000;
+					roundTimer = 1f; 
+					enemyCount = 10000;
 					for(int i=0;i<enemyCount;i++)
 					{
 						Random r = new Random();
@@ -549,8 +587,7 @@ class Pathing {
 					GameWindow g = new GameWindow();
 					g.run();
 				}
-				
-				
+
 				startTime();
 			}
 
@@ -562,7 +599,7 @@ class Pathing {
                 if (towerToPlace != null && tower != towerToPlace) {
                     // checking if the mouse point lies within the range of the tower
                     boolean intersects = tower.within(mouseLoc.x, mouseLoc.y);
-                    // rendering the circular display to show if invalid areas for placement
+                    // rendering the circular display to show range
                     tower.renderBorder(window, intersects);
                 }
                 // checking if the current tower is the tower being placed by the user
@@ -572,82 +609,106 @@ class Pathing {
                 } else {
                     // otherwise calculating the rotation move to aim at players
                     NPC nearestEnemy = tower.getNearestEnemy(npcs);
-                    // checking that the nearest enemy isn't null and then checking the health of the npc we are shooting to see if they are dead
-                    if(nearestEnemy != null && nearestEnemy.getHealth() < 0 )
-                        npcs.remove(nearestEnemy);
                     // rotating the tower to face the enemy
                     tower.calcMove(0, 0, screenWidth, screenWidth,elapsedTime);
                 }
 				
 				//Shooting of the tower
-				if (tower.getNearestEnemy(npcs) != null && tower.getFireRate() > tower.getCooldown())
+				if (tower.getNearestEnemy(npcs) != null && tower.getFireRate() > tower.getCooldown() && tower.getPlaced())
 				{
 					tower.getNearest().setHealth(tower.getType(),tower.getDamage());
+					
+						if((tower.getFrame() < tower.calcDistance(tower.getNearest()))&&(tower.getFrame() < 896)){
+							if(tower.getAnimationTime() > 60)
+							{
+								tower.setFrame(tower.getFrame()+128);
+								tower.resetAnimationTime();
+							}
+						}else{
+							tower.setFrame(0);
+						}
+					tower.anim(tower.getFrame(),115,2);
+					tower.setFireRate();
 				}
+				else if(tower.getPlaced()==true && !tower.isTrap())
+				{
+					tower.anim(0,115,2);	
+				}
+				
 				// performing the move and drawing to the window
                 tower.performMove();
                 tower.draw(window);
 			}
-			
+			// Update NPC's
 			for(NPC npc: npcs)
 			{
 				if(npc.getHealth() <= 0 ) 
 				{	
-					npcToRemove.push(npc);
-					enemiesAlive--;
-					enemiesDead++;
-					Color exitColour = new Color(41,17,17);
-					//Only drop items if killed by turrets
-					if(!npc.isSimilar(selectedMap.getBackground().getPixel((int)Math.round(npc.x),(int)Math.round(npc.y)),exitColour,17))
+					if(npc.getAnimationTime() > 225)
 					{
-						for(int i=0;i<npc.getDropCount();i++)
-							generateItem(npc);
-					}
-					else
-					{
-						baseHealth--;
-						//Game over
-						if(baseHealth==0)
+						npc.setFrame(npc.getFrame()+32);
+						npc.anim(npc.getFrame(),32,1);
+						npc.resetAnimationTime();
+						npc.setIsDead();
+						//When the death animation has finished
+						if(npc.getFrame() >= 256)
 						{
-							System.exit(0);
+							npcToRemove.push(npc);
+							enemiesAlive--;
+							enemiesDead++;
+							Color exitColour = new Color(41,17,17);
+							//Only drop items if killed by turrets
+							if(!npc.isSimilar(selectedMap.getBackground().getPixel((int)Math.round(npc.x),(int)Math.round(npc.y)),exitColour,17))
+							{
+								for(int i=0;i<npc.getDropCount();i++)
+									generateItem(npc);
+							}
+							else
+							{
+								baseHealth--;
+								//Game over
+								if(baseHealth==0)
+								{
+									//Display game over screen
+									return;
+								}
+							}
+							for(Tower tower: towers)
+							{
+								if(tower.getNearest()==npc)
+								{
+									tower.setKillCount();
+									tower.setNearestEnemy(null);
+								}
+							}
 						}
 					}
-					for(Tower tower: towers)
+					if(actors.contains(enemyInfo))
 					{
-						if(tower.getNearest()==npc)
-						{
-							tower.setNearestEnemy(null);
-						}
+						actors.remove(enemyInfo);
+						statEnemy = null;
 					}
-
 				}
 				for(Tower tower: towers)
 				{
 					if(tower.isTrap() && tower.getImg().getGlobalBounds().contains(npc.x,npc.y) && tower.getFireRate() > tower.getCooldown())
 					{
-						npc.setHealth(tower.getType(),tower.getDamage());
-						tower.setTrapHealth();
-						tower.setFireRate();
+						if(npc.getHealth() > 0)
+						{
+							npc.setHealth(tower.getType(),tower.getDamage());
+							tower.setTrapHealth();
+							tower.setFireRate();
+						}
 						if(tower.getTrapHealth()<=0)
 						{
 							towerToRemove.push(tower);
 						}
-					
 					}
-				
 				}
-				npc.calcMove(0, 0, screenWidth, screenHeight,elapsedTime);
-				npc.performMove();
+				if(npc.getHealth() > 0 ) npc.calcMove(0, 0, screenWidth, screenHeight,elapsedTime);
+				if(npc.getHealth() > 0 )npc.performMove();
                 npc.draw(window);
 			}
-			
-			for(Bullet bl : bullets)
-			{
-				bl.calculateDistanceToTarget();
-				if(bl.enemy != null)bl.checkProximity();
-			}
-
-
 			
 			for (ImageAct buttonsIMG: ButtonsIMG)
 				buttonsIMG.draw(window);
@@ -674,15 +735,16 @@ class Pathing {
 			//Enemies spawn every .5  seconds
 			if(roundTimer == 0)
 			{		
-				if((enemiesDead+enemiesAlive) < enemyCount && time.getElapsedTime().asMilliseconds() > 500)
+				if((enemiesDead+enemiesAlive) < enemyCount && time.getElapsedTime().asMilliseconds() > 250)
 				{
 					Random r = new Random();
 					int random = r.nextInt(noOfEnemyTypes);
+					//Randomly chooses an enemy type from the available options 
 					while(true)
 					{
 						if(noOfEnemyTypes==0)
 							break;
-						else if(enemyComposition[random]==0)
+						else if(enemyComposition[random]==0)//Reduces the liklihood of getting an enemyType which is 0
 						{
 							if(random==noOfEnemyTypes-1)
 							{
@@ -693,33 +755,39 @@ class Pathing {
 						{
 								if(random==0)
 								{
-									Gremlin enemy = new Gremlin(134f, 134f, 0,difficulty, selectedMap);
+									Gremlin enemy = new Gremlin(100f, 100f, 0,difficulty, selectedMap);
 									npcs.add(enemy);
+									enemy.anim(0,16,1);
 								}
 								else if(random==1)
 								{
-									SpeedDemon enemy = new SpeedDemon(134f, 134f, 0,difficulty, selectedMap);
+									SpeedDemon enemy = new SpeedDemon(100f, 100f, 0,difficulty, selectedMap);
 									npcs.add(enemy);
+									enemy.anim(0,16,1);
 								}
 								else if(random==2)
 								{
-									Yeti enemy = new Yeti(134f, 134f, 0,difficulty, selectedMap);
+									Yeti enemy = new Yeti(100f, 100f, 0,difficulty, selectedMap);
 									npcs.add(enemy);
+									enemy.anim(0,16,1);
 								}
 								else if(random==3)
 								{
-									Fenrir enemy = new Fenrir(134f, 134f, 0,difficulty, selectedMap);
+									Fenrir enemy = new Fenrir(100f, 100f, 0,difficulty, selectedMap);
 									npcs.add(enemy);
+									enemy.anim(0,16,1);
 								}
 								else if(random==4)
 								{
-									Phoenix enemy = new Phoenix(134f, 134f, 0,difficulty, selectedMap);
+									Phoenix enemy = new Phoenix(100f, 100f, 0,difficulty, selectedMap);
 									npcs.add(enemy);
+									enemy.anim(0,16,1);
 								}
 								else if(random==5)
 								{
-									Cthulhu enemy = new Cthulhu(134f, 134f, 0,difficulty, selectedMap);
+									Cthulhu enemy = new Cthulhu(100f, 100f, 0,difficulty, selectedMap);
 									npcs.add(enemy);
+									enemy.anim(0,16,1);
 								}
 								break;
 						}
@@ -727,6 +795,28 @@ class Pathing {
 					time.restart();
 					enemiesAlive++;
 				}
+			}
+			String ImageFile[] = {"InGameButtons/ff_button.png", "InGameButtons/pause_button.png", "InGameButtons/mute_button.png", "InGameButtons/unmute_button.png"};
+			ImageAct inGameButtons[];
+			GenButton settingsButtons[];
+			inGameButtons = new ImageAct[ImageFile.length];
+			settingsButtons = new GenButton[ImageFile.length];
+
+			for (int i=0; i<ImageFile.length; i++) {
+				inGameButtons[i] = new ImageAct(ImageFile[i]);
+				settingsButtons[i] = new GenButton(30, 30, Color.BLUE, 70);
+			}
+		
+			inGameButtons[0].setLocation((float) 880, (float) 715);
+			inGameButtons[1].setLocation((float) 925, (float) 715);
+			inGameButtons[2].setLocation((float) 970, (float) 715);
+			settingsButtons[0].setLocation((float) 880, (float) 715);
+			settingsButtons[1].setLocation((float) 925, (float) 715);
+			settingsButtons[2].setLocation((float) 970, (float) 715);
+			
+			for (int i=0; i<3; i++) {
+				inGameButtons[i].draw(window);
+				settingsButtons[i].draw(window);
 			}
 			
 			// Update the display with any changes
@@ -747,21 +837,26 @@ class Pathing {
 						//Apply item effects
 						if(item.getImg().getGlobalBounds().contains(mouseLoc.x,mouseLoc.y))
 						{
-								for(Tower tow : towers)
-								{
+								
 									if(item.getEffect()==1)//Adjust tower damage depending on difficulty
 									{
-										if(difficulty.equals("easy"))if(tow.getDamage()==tow.getBaseDamage())tow.setDamage(2f);
-										else if(difficulty.equals("intermediate")) if(tow.getDamage()==tow.getBaseDamage())tow.setDamage(1.5f);
-										else if(difficulty.equals("hard")) if(tow.getDamage()==tow.getBaseDamage())tow.setDamage(1.2f);
-										damageTime = new Clock();
+										for(Tower tow : towers)
+										{
+											if(difficulty.equals("easy"))if(tow.getDamage()==tow.getBaseDamage())tow.setDamage(2f);
+											else if(difficulty.equals("intermediate")) if(tow.getDamage()==tow.getBaseDamage())tow.setDamage(1.5f);
+											else if(difficulty.equals("hard")) if(tow.getDamage()==tow.getBaseDamage())tow.setDamage(1.2f);
+											damageTime = new Clock();
+										}
 									}
 									else if(item.getEffect()==2)//Adjust tower firerate depending on difficulty
 									{
-										if(difficulty.equals("easy"))if(tow.getCooldown()==tow.getBaseCooldown())tow.setCooldown(0.5f);
-										else if(difficulty.equals("intermediate")) if(tow.getCooldown()==tow.getBaseCooldown())tow.setCooldown(0.7f);
-										else if(difficulty.equals("hard")) if(tow.getCooldown()==tow.getBaseCooldown())tow.setCooldown(0.85f);
-										firerateTime = new Clock();
+										for(Tower tow : towers)
+										{
+											if(difficulty.equals("easy"))if(tow.getCooldown()==tow.getBaseCooldown())tow.setCooldown(0.5f);
+											else if(difficulty.equals("intermediate")) if(tow.getCooldown()==tow.getBaseCooldown())tow.setCooldown(0.7f);
+											else if(difficulty.equals("hard")) if(tow.getCooldown()==tow.getBaseCooldown())tow.setCooldown(0.85f);
+											firerateTime = new Clock();
+										}
 									}
 									else if(item.getEffect()==3)//Remove enemy defences
 									{
@@ -774,24 +869,40 @@ class Pathing {
 									}
 									else if(item.getEffect()==4) //Increase scrapValue
 									{
-										if(difficulty.equals("easy"))scrapValue *= 3;
-										else if(difficulty.equals("intermediate")) scrapValue *= 2;
-										else if(difficulty.equals("hard")) scrapValue *= 1.5;
+										if(difficulty.equals("easy"))if(scrapValue==baseScrapValue)scrapValue *= 1.5;
+										else if(difficulty.equals("intermediate"))if(scrapValue==baseScrapValue) scrapValue *= 1.3;
+										else if(difficulty.equals("hard")) if(scrapValue==baseScrapValue) scrapValue *= 1.2;
 										fortuneTime = new Clock();
 									}
 									else
 									{
 										scrap+=scrapValue;
 									}
-								}
+								
 							itemToRemove.push(item);
 							toRemove.push(item);
 						}
 					}
 				}
+				//Removes info about enemy or tower if click is register of the map
+				if(event.type == Event.Type.MOUSE_BUTTON_RELEASED){
+					if(event.asMouseButtonEvent().button == Mouse.Button.LEFT)
+					{
+							if(actors.contains(towerInfo))
+							{
+								actors.remove(towerInfo);
+								statTower = null;
+							}
+							if(actors.contains(enemyInfo))
+							{	
+								actors.remove(enemyInfo);
+								statEnemy = null;
+							}
+					}
+				}
 			
 				//Draws a tower at the cursors position on map
-				if((mouseLoc.x < 855f && mouseLoc.x > 150f) && (mouseLoc.y < 745f && mouseLoc.y > 40))
+				if((mouseLoc.x < 855f && mouseLoc.x > 150f) && (mouseLoc.y < 765f && mouseLoc.y > 40))
 				{
 					if(event.type == Event.Type.MOUSE_BUTTON_RELEASED){
 						if(event.asMouseButtonEvent().button == Mouse.Button.LEFT)
@@ -802,6 +913,7 @@ class Pathing {
 								// checking if the place we are trying to place the tower is valid
 								if (towerToPlace.placementCheck(mouseLoc.x, mouseLoc.y, towerToPlace.getImg().getGlobalBounds(), towers,selectedMap)) {
 									// updating the tower to acknowledge it has been placed
+									towerToPlace.changeSpriteImage(tAnimFile[selectedTower]);
 									towerToPlace.setPlaced(true);
 									// resetting the towerToPlace variable to null
 									towerToPlace = null;
@@ -810,38 +922,45 @@ class Pathing {
 								}
 							}
 							
-							
+							//Actions performed when a placed tower is clicked
 							for(Tower tower : towers)
 							{
-								if(tower.getImg().getGlobalBounds().contains(mouseLoc.x,mouseLoc.y))
+								if(tower.within(mouseLoc.x,mouseLoc.y,10))
 								{
-										if(actors.contains(enemyInfo))actors.remove(enemyInfo);
+										if(actors.contains(enemyInfo))
+										{	
+											actors.remove(enemyInfo);
+											statEnemy = null;
+										}
 										displayInfo(tower);
+										statTower = tower;
 								}
 							}
-							
+							//Actions performed when an enemy is clicked
 							for(NPC npc : npcs)
 							{
 								if(npc.getImg().getGlobalBounds().contains(mouseLoc.x,mouseLoc.y))
 								{
-									if(actors.contains(towerInfo))actors.remove(towerInfo);
+									if(actors.contains(towerInfo))
+									{
+										actors.remove(towerInfo);
+										statTower = null;
+									}
 									displayInfo(npc);
+									statEnemy = npc;
 								}
 							}
-						}
+						}//Removes the tower
 						else if(event.asMouseButtonEvent().button == Mouse.Button.RIGHT)
-						{
+						{	
 								// otherwise looping over all the towers and checking if we are trying to pick up a tower
 								for (Tower tower : towers) {
 									// checking if the mouse click is within a region of the tower
-									if (tower.within(mouseLoc.x, mouseLoc.y, 25)) {
-										// updating the tower for moving around the map
-										tower.setPlaced(false);
-										// removing the nearest enemy from the selected tower
-										tower.setNearestEnemy(null);
-										// setting the towerToPlace to the current tower
-										towerToPlace = tower;
-									}
+										if(tower.within(mouseLoc.x,mouseLoc.y,10))
+										{
+												towerToRemove.push(tower);
+												scrap += (int)tower.getCost()/2;
+										}
 								}
 						}
 					}	
@@ -855,12 +974,21 @@ class Pathing {
                     // checking if the key pressed is U for upgrading the currently selected tower
                     if (Keyboard.isKeyPressed(Keyboard.Key.U)) {
                         // checking we currently have a tower selected
-                        if (towerToPlace != null) {
-                            // upgrading the tower
-                            towerToPlace.upgrade(towerFile);
-                        }
+						for(Tower tower : towers)
+						{	
+								if(tower.within(mouseLoc.x,mouseLoc.y,10))
+								{
+									// upgrading the tower
+									if(scrap > tower.getUpgradeCost())
+									{
+										tower.upgrade();
+										scrap -=  tower.getUpgradeCost();
+								}	}
+						}
                     }
                 }
+				
+
 				
 				//Buttons
 				for(int i=0;i<rect.length;i++)
@@ -873,7 +1001,6 @@ class Pathing {
 							{	
 								selectedTower = i;
 								if (towerToPlace == null) {
-									System.out.println("T pressed, creating a new tower");
 									// creating a new tower based off the mouse coordinates and setting it up for placement
 									switch(selectedTower){
 										case 0:	towerToPlace = new Alien(mouseLoc.x, mouseLoc.y, 0, selectedMap, false);
@@ -888,11 +1015,11 @@ class Pathing {
 												break;
 										case 5: towerToPlace = new GalaxyGun(mouseLoc.x, mouseLoc.y, 0, selectedMap, false);
 												break;
-										case 6: towerToPlace = new IonTurret(mouseLoc.x, mouseLoc.y, 0, selectedMap, false);
+										case 6: towerToPlace = new Dreadnought(mouseLoc.x, mouseLoc.y, 0, selectedMap, false);
 												break;
-										case 7: towerToPlace = new WarpShip(mouseLoc.x, mouseLoc.y, 0, selectedMap, false);
+										case 7: towerToPlace = new IonTurret(mouseLoc.x, mouseLoc.y, 0, selectedMap, false);
 												break;
-										case 8: towerToPlace = new Dreadnought(mouseLoc.x, mouseLoc.y, 0, selectedMap, false);
+										case 8: towerToPlace = new WarpShip(mouseLoc.x, mouseLoc.y, 0, selectedMap, false);
 												break;
 										//case 9: towerToPlace = new DarkMatterCannon(mouseLoc.x, mouseLoc.y, 0, selectedMap, false);
 											//	break;
@@ -906,6 +1033,7 @@ class Pathing {
 									}
 								
 									// adding the new tower to the towers list
+									System.out.println("Cost: " + towerToPlace.getCost());
 									if(scrap < towerToPlace.getCost())
 									{
 										towerToPlace = null;
@@ -920,6 +1048,7 @@ class Pathing {
 									
 								} else {
 									// otherwise removing the towerToPlace from the list if T is pressed again whilst moving a tower
+									scrap += (int)towerToPlace.getCost()/2;
 									towers.remove(towerToPlace);
 									// resetting the towerToPlace 
 									towerToPlace = null;
@@ -927,22 +1056,56 @@ class Pathing {
 							
 							}
 						}
+						else if(event.type == Event.Type.MOUSE_MOVED) {
+							int selectedTower2 = i;
+								
+									switch(selectedTower2){
+									case 0:	displayCost("alien");
+											break;
+									case 1: displayCost("miniship");
+											break;
+									case 2: displayCost("minicannon");
+											break;
+									case 3: displayCost("starship");
+											break;
+									case 4: displayCost("startower");
+											break;
+									case 5: displayCost("galaxygun");
+											break;
+									case 6: displayCost("dreadnought");
+											break;
+									case 7: displayCost("ionturret");
+											break;
+									case 8: displayCost("warship");
+											break;
+									//case 9: towerToPlace = new DarkMatterCannon(mouseLoc.x, mouseLoc.y, 0, selectedMap, false);
+										//	break;
+									case 10: displayCost("electricswarm");
+											 break;									
+									case 11: displayCost("wormhole");
+											 break;
+									case 12: displayCost("blackhole");
+											 break;
+									default: break;
+								}
+						}
 					}
 						else {rect[i].setRectColor(Color.TRANSPARENT, 0);}
+				}
+				if (settingsButtons[2].detectPos(settingsButtons[2].getRectPosition(), settingsButtons[2].getRectDimensions(), mouseLoc)) {
+					if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+						if (count == 0) {
+							count ++;
+							BGM.stop();
+						}
+						if (count == 1) {
+							count = 0;
+							BGM.play();
+						}
+					}
 				}
 				
 			}
 		}
 	}
 }
-/* To do List 
-// Pathing - Constructor for which level/map, save state(wave, base health, difficulty),Enemy composition for each wave e.g only 1 enemy type for level 1
-// NPC - Need make sure NPC's complete the track consistently,Random chance for even the toughest enemies to spawn (roundNumber * chance to spawn to increse the odds)
-// Towers - Implement turret upgrades,Towers need a cost
-// Items - Just needs testing
-// Cleanup all classes
-// ***Relies on border colour being in at least 3 directions
-// ***Equal distance should be a non-issue if enemys always starts close or at the edge of the screen
-// ***Only works for straight edges on the borders - Limitation
-// *** If boundaryboxes are used then sprite <= lane size wont fit
-*/

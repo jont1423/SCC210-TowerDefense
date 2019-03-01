@@ -17,6 +17,16 @@ public class Save {
 		
 	}
 	
+	public void IncreaseLevel()
+	{
+		currLvl++;
+	}
+	
+	public void setLevel(int newLevel)
+	{
+		currLvl = newLevel;
+	}
+	
 	public int getCurrLvl()
 	{
 		return currLvl;
@@ -40,10 +50,10 @@ public class Save {
 	
 	public void newGame(String diff){
 		
-		currLvl = 5;
+		currLvl = 1;
 		currRound = 1;
 		
-		setDiff("easy");
+		setDiff(diff);
 				
 	}
 	
@@ -55,8 +65,7 @@ public class Save {
 			currLvl = 1;
 			currRound = 1;
 			diff.equals("easy");
-		}
-			
+		}			
 	}
 	
 	//Saves the current values to the .txt file

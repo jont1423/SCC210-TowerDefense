@@ -1,4 +1,5 @@
 import org.jsfml.graphics.*;
+import org.jsfml.system.*;
 
  abstract class NPC extends ImageActor //This consists of both Enemies and Friendlies enemy.java is redundant???
 	{
@@ -10,19 +11,27 @@ import org.jsfml.graphics.*;
 		int dropCount; //Number of drops when killed
 		private Image iBackground;
 		private Background background;
-		//private int[] direction = new int[] {0,0,0,0}; //Can be removed use compass variable instead
 		private int[] directionDistance = new int[] {0,0,0,0}; //Compass clockwise
 		private int[] oldDirectionDistance = new int[] {0,0,0,0}; //Compass clockwise
-		private float highest = 0; //Highest distance from NPC
-		private float lowest = 5000; //Lowest distance from NPC
+		private float highest = 0; //Highest distance from border
+		private float lowest = 5000; //Lowest distance from border
 		private String tempCompass = " ";
 		private String compass = " ";
 		private boolean firstLoop = false;
 		private  int screenWidth  = 1024;
 		private  int screenHeight = 768;
 		private boolean finalPath = false;
-	 	private int frame = 0;// Frame used in animation
+		private boolean isDead = false;
+		private int frame = 0;// Frame used in animation
+		private Clock animationTime = new Clock();
 		
+		/**
+		* Constructor of NPC
+		* @param xPixelsPerSecond The number of pixels the NPC should move in the x direction
+		* @param yPixelsPerSecond The number of pixels the NPC should move in the y direction
+		* @param textureFile The file name of the NPC sprite
+		* @param background The background that the NPC will be displayed on
+		*/
 		NPC(float xPixelsPerSecond, float yPixelsPerSecond,int r, String textureFile, Background background)
 		{
 	
@@ -35,66 +44,117 @@ import org.jsfml.graphics.*;
 			this.health = health;
 			this.armour = armour;
 		}
-	 
-	 	void setFrame(int i){
+		void setFrame(int i){
 			frame = i;
 		}
 		
 		int getFrame(){
 			return frame;
 		}
-	 
+		/**
+		* Sets the health to 0 and remove variable to true so the NPC can be removed from screen
+		*/
 		void die()
 		{
 			health=0;
 			remove = true;
-			//Animation funcions in animation
-			//return (health <=0)
-			 //--->In windows//Call to actor .remove() in actor
 		}
-		
+		/**
+		* Returns isDead variable
+		* @return isDead boolean that determines if NPC is dead
+		*/
+		boolean getIsDead()
+		{
+			return isDead;
+		}
+		/**
+		* Sets isDead variable to true
+		*/
+		void setIsDead()
+		{
+			isDead = true;
+		}
+		/**
+		* Returns the animationTime as milliseconds
+		* @return animationTime as seconds
+		*/
+		float getAnimationTime()
+		{
+			return animationTime.getElapsedTime().asMilliseconds();
+		}
+	
+		/**
+		* Restarts animationTime
+		*/
+		void resetAnimationTime()
+		{
+			animationTime.restart();
+		}
+		/**
+		* Returns ID 
+		* @return ID The ID representing tower subclass
+		*/
 		String getID()
 		{
 			return ID;
 		}
 		
-
+		/**
+		* Reduces the armour variable by the amount passed as a paramter
+		* @param damage The value deducted from armour
+		*/
 		void setArmour(int damage)
 		{
 			//Need to calculate new damage
 			armour -= damage;
 		}
-		
+		/**
+		* Returns the value of armour
+		* @return armour The armour value
+		*/
 		int getArmour()
 		{
 			return armour;
 		}
-		
+		/**
+		* Returns the amount of items the NPC can drop
+		* @return dropCount The number of items the NPC can drop
+		*/
 		int getDropCount()
 		{
 			return dropCount;
 		}
-		
+		/**
+		* Sets the type of the NPC to 'null'
+		*/
 		void setTypeNull()
 		{
 			type = new String[] {"null"};
 		}
-		
+		/**
+		* Sets the type of the NPC back to its defaults type(s)
+		*/
 		void setDefaultType()
 		{
 			type = defaultType;
 		}
-		
+		/**
+		* Returns the type(s) of the NPC
+		* @return typeList String containing all the types of the NPC
+		**/
 		String getType()
 		{
 			String typeList = " ";
 			for(int i=0;i<type.length;i++)
 			{
-				typeList += type[i];
+				typeList += type[i]+"\n";
 			}
 			return typeList;
 		}
-		
+		/**
+		* Calculates the multiplier to be used in a calculation with the tower damage 
+		* @param towerType The type of the tower that the damage is being calculated for
+		*/
 		float calculateDamage(String towerType)
 		{
 			float multiplier = 1;
@@ -164,15 +224,19 @@ import org.jsfml.graphics.*;
 					else if(type[i].equals("galaxy")) multiplier *= 2;
 				}
 			}
-				System.out.println("Multiplier: " + multiplier);
+			
 			return multiplier;
 		}
-		
+		/**
+		* Reduces the health variable by the damage calculated within this method
+		* @param towerType The type of the tower causing damage
+		* @param damage The damage of the tower without considering type
+		*/
 		void setHealth(String towerType, int damage)
 		{
-			System.out.println("DamageBefore: " + damage);
+		
 			damage = (int) (damage * calculateDamage(towerType));
-			System.out.println("DamageAfter: " + damage);
+		
 
 			if(armour>0)
 			{
@@ -184,12 +248,22 @@ import org.jsfml.graphics.*;
 				health -= damage;
 			}
 		}
-		
+		/**
+		* Returns the value of the health variable
+		* @return health The value of the health variable
+		*/
 		int getHealth()
 		{
 			return health;
 		}
-
+		/**
+		* Calculates how much the NPC should move depending on direction and independent of framerate
+		* @param minx The minimum x value
+		* @param miny The minimum y value
+		* @param maxx The maximum x value
+		* @param maxy The maximum y value
+		* @param time The time since the last game loop
+		*/
 		void calcMove(int minx, int miny, int maxx, int maxy,float time)
 		{
 			pathCheck();
@@ -213,15 +287,14 @@ import org.jsfml.graphics.*;
 				if(compass.equals("left") || compass.equals("right"))highest-= dx*time;
 			}
 		}
-
+		/**
+		* Determines direction to move in whilst also constantly cheking the sides of the path for any changes
+		*/
 		void pathCheck()
 		{
 				Color borderColour = background.getBorderColour();
 				Color borderIntersection = background.getIntersectionColour();
-				int accuracy = background.getAccuracy(); //How similar the colours colours are
-			//	System.out.println("X: " + x + "Y " + y + "Colour: " + iBackground.getPixel((int)x,(int)y));
-				//System.out.println("highest: " +highest);
-				//System.out.println("lowest: " +lowest);			
+				int accuracy = background.getAccuracy(); //How similar the colours colours are		
 
 				//Calculates the distances to determine the new direction
 				if(highest<=lowest)
@@ -238,9 +311,6 @@ import org.jsfml.graphics.*;
 					oldDirectionDistance[3] = directionDistance[3];
 					compass = tempCompass;
 				
-
-				//System.out.println("Compass: " + compass);
-				//System.out.println("Highest: " + highest);
 				if(finalPath) lowest = 5;
 
 					firstLoop=false;
@@ -255,19 +325,22 @@ import org.jsfml.graphics.*;
 					//lowest = side that doesnt change distance
 					if(compass.equals("up") || compass.equals("down"))
 					{
-						changeLowest(3,1,false);
-						changeLowest(1,3,false);
+						changeLowest(3,1);
+						changeLowest(1,3);
 
 					}
 					if(compass.equals("left") || compass.equals("right"))
 					{
-						changeLowest(0,2,true);
-						changeLowest(2,0,true);
+						changeLowest(0,2);
+						changeLowest(2,0);
 					}
 					if(finalPath) lowest = 5;
 				}
 		}
-		//returns true if colours are similar
+		/**
+		* Returns true if colours are similar
+		* @return true
+		*/
 		boolean isSimilar(Color colour1, Color colour2, int accuracy)
 		{	
 			if(colour1.r < (colour2.r-accuracy) || colour1.r > (colour2.r+accuracy)) return false;			
@@ -275,33 +348,36 @@ import org.jsfml.graphics.*;
 			if(colour1.b < (colour2.b-accuracy) || colour1.b > (colour2.b+accuracy)) return false;
 			return true;
 		}
-		
-		void changeLowest(int compassOne, int compassTwo,boolean multiply)
+		/**
+		* Changes the value of the lowest variable
+		* @param compassOne The 1st direction
+		* @param compassTwo The direction opposite compassOne
+		*/
+		void changeLowest(int compassOne, int compassTwo)
 		{
-			//if(finalPath) return;
 			float tempLowest;
 			float tempLowest2;
 			//Only applies to intersection paths
 			float difference = (highest-lowest);
-			if(!multiply)
-			{
-				tempLowest = directionDistance[compassTwo]; //No Constant if pathWidthY/pathWidthX = 1
-				tempLowest2 = directionDistance[compassOne];
-			}
-			else
-			{
-				tempLowest = directionDistance[compassTwo];
-				tempLowest2 = directionDistance[compassOne];
-			}
+	
+			tempLowest = directionDistance[compassTwo];
+			tempLowest2 = directionDistance[compassOne];
+	
 			if(oldDirectionDistance[compassOne] != directionDistance[compassOne])
 			{
 				if(directionDistance[compassTwo]<directionDistance[compassOne] && difference < 50)lowest = tempLowest;
 				if(directionDistance[compassOne]<directionDistance[compassTwo] && difference < 50)lowest = tempLowest2;
 				oldDirectionDistance[compassOne] = directionDistance[compassOne];
-				//System.out.println("LowestShouldBe: "+ lowest);
 			}
 		}
-		
+		/**
+		* Calculates the distance the NPC is from the border in the driection passed in
+		* @param direction1 The direction that distance is determined
+		* @param oppositeDirection The direction opposite direction1
+		* @param borderColour The colour of the border
+		* @param borderIntersection The colour of the intersection
+		* @param accuracy The value for how similar the colours need to be
+		*/
 		int calculateDistance(String direction1,String oppositeDirection, Color borderColour, Color borderIntersection, int accuracy)
 		{
 			int distance = 0;
@@ -311,7 +387,7 @@ import org.jsfml.graphics.*;
 			Color endColor = new Color(41,17,17);
 			while(!collision)
 			{
-				if(direction1.equals("left") && x-distance<=150) break; //THESE NUMBERS NEED TO BE SIZE OF THE MAP
+				if(direction1.equals("left") && x-distance<=150) break; 
 				if(direction1.equals("right") && x+distance>=855) break;
 				if(direction1.equals("up") && y-distance<=40) break;	
 				if(direction1.equals("down") && y+distance>=765) break;
@@ -359,7 +435,6 @@ import org.jsfml.graphics.*;
 			if(direction1.equals("right")) directionDistance[1]=distance;
 			if(direction1.equals("up")) directionDistance[0]=distance;
 			if(direction1.equals("down")) directionDistance[2]=distance;
-		//	System.out.println("direction: " + direction1+ "distance: " + distance);
 		
 			if(distance>highest && !compass.equals(oppositeDirection))  //Current direction is not oppositeSide
 			{
@@ -370,5 +445,3 @@ import org.jsfml.graphics.*;
 			return distance;
 		}
 	}
-	
-	//Getting stuck due to rounding in get pixel (test ceil and floor)

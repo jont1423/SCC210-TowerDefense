@@ -34,9 +34,4 @@ public class ImageAct extends Actor {
 		setPosition = image :: setPosition;
 
 	}
-	
-	void calcMove(int minx, int miny, int maxx, int maxy, float time)
-	{
-		
-	}
 }

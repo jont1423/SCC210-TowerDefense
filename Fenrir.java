@@ -1,4 +1,12 @@
 import org.jsfml.graphics.*;
+/**
+* Constructor of Fenrir
+* @param xPixelsPerSecond The number of pixels the fenrir should move per second in the x direction
+* @param yPixelsPerSecond The number of pixels the fenrir should move per second in the y direction
+* @param r The rotation of the fenrir
+* @param diffculty The diffculty of the game
+* @param background The background the fenrir will be displayed on
+*/
 public class Fenrir extends NPC
 {
 	public Fenrir(float xPixelsPerSecond, float yPixelsPerSecond,int r,String diffculty, Background background)

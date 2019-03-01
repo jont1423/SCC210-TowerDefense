@@ -25,117 +25,258 @@ public class GameWindow {
 	private static int screenHeight = 768;
 	
 	private static String Title = "Constellation";
-	private static String ImageFile = "Wallpaper.png";
-	private static String SoundFile = "BGM.wav";
-	private static String ButtonFile[] = {"Buttons/playButton.png", "Buttons/levelButton.png", "Buttons/exitButton.png"};
-	private static ImageAct wallpaperIMG, ButtonsIMG[];
-	private static GenSound BGM, sound1;
-	private static GenButton rect[];
+
+	private static BackgroundMusic BGM;
 	private static Mouse mouseMov;
 	private static Vector2i mouseLoc;
+	private static MainMenu mainMenu;
+	private static StoryMode storyMode;
+	private static QuitScreen quitScreen;
+	private static ChooseLevDif chooseLevel, chooseDif;
+	private static Save s;
 	
-	private float buttonX = 50, buttonY = 0, adjustX, adjustY;
-	private boolean mainMenuOn = false;
+	private boolean mainMenuOn = true, mainMenuFunc = true, storyModeOn = false, storyModeFunc = false,
+					scenesOn = false, alertScreenOn = false, chooseLevOn = false, chooseDifOn = false;
 	
-	public void run () {
-		System.out.println("ButtonFile array length: " + ButtonFile.length);
+	public GameWindow() {
+		BGM = new BackgroundMusic();
+		BGM.play();
 		
+		mainMenu = new MainMenu();
+		storyMode = new StoryMode();
+		quitScreen = new QuitScreen();
+		chooseLevel = new ChooseLevDif("Level");
+		chooseDif = new ChooseLevDif("Difficulties");
+	}
+	
+	public void run () {		
 		// Create a window
 		RenderWindow window = new RenderWindow();
 		window.create(new VideoMode(screenWidth, screenHeight), Title, WindowStyle.CLOSE);
 
 		window.setFramerateLimit(30); // Avoid excessive updates
-
-		// Create some actors
-		BGM = new GenSound(SoundFile);
-		wallpaperIMG = new ImageAct(ImageFile);
-		ButtonsIMG = new ImageAct[ButtonFile.length];
-		rect = new GenButton[ButtonFile.length];
-		for (int i=0; i<ButtonFile.length; i++)
-			ButtonsIMG[i] = new ImageAct(ButtonFile[i]);
 		
-		ButtonsIMG[0].setLocation(buttonX, buttonY);
-		adjustX = 20; adjustY = -80;
-		ButtonsIMG[1].setLocation(buttonX - adjustX, buttonY + adjustY);
-		adjustX = 0; adjustY = 100;
-		ButtonsIMG[2].setLocation(buttonX - adjustX, buttonY + adjustY);
+		int count = 0;
 		
-		rect[0] = new GenButton(199, 80, Color.MAGENTA, 0);
-		rect[1] = new GenButton(215, 63, Color.GREEN, 0);
-		rect[2] = new GenButton(140, 50, Color.YELLOW, 0);
-		rect[0].setLocation((float) 445, (float) 432);
-		rect[1].setLocation((float) 440, (float) 540);
-		rect[2].setLocation((float) 475, (float) 632);
-		
-		BGM.loop(true);
-		BGM.playSound();
-
 		// Main loop
 		while (window.isOpen()) {
-			// Clear the screen
+			// Clear the screen	
 			window.clear(Color.WHITE);
 			
-			//Space for sound/mute button
-			
-			wallpaperIMG.draw(window);
-			for (ImageAct buttonsIMG: ButtonsIMG)
-				buttonsIMG.draw(window);
-			for (GenButton rects: rect)
-				rects.draw(window);
-			
 			// Update the display with any changes
-			window.display();
 		
+			count = mainMenu.display(window, mainMenuOn, count);			//Draw mainmenu
+			storyMode.display(window, count, storyModeOn, scenesOn,s);
+			quitScreen.display(window, alertScreenOn);
+			chooseLevel.display(window, chooseLevOn, "level");		
+			chooseDif.display(window, chooseDifOn, "difficulties");		
+
+			//check mouse coordinates in each frame
 			mouseLoc = mouseMov.getPosition(window);
-
-			//System.out.println(mouseMov.getPosition(window));
-			//System.out.println(rect0.getRectDimensions().x);
-			//System.out.println(rect0.getRectPosition().x);
-
+			//System.out.println(mouseLoc);
+		
 			// Handle any events
 			for (Event event : window.pollEvents()) {
-				
 				if (event.type == Event.Type.CLOSED) {
 					// the user pressed the close button
 					window.close();
 				}
 				
-				if (rect[0].detectPos(rect[0].getRectPosition(), rect[0].getRectDimensions(), mouseLoc)) {
-					rect[0].setRectColor(Color.MAGENTA, 40);
-					if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
-						ImageAct wallpaperIMG1 = new ImageAct("Wallpaper.jpg");
-						wallpaperIMG1.draw(window);
-						//Need to save file to understand what needs setting
-						//Pathing p = new Pathing(window,Which map,Which wave,Base health);
+				//Main Menu Event 
+				if (mainMenuFunc) {
+					//*************** New Main Menu Event ****************
+					if (mainMenu.newGameEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							mainMenuOn = false;
+							mainMenuFunc = false;
+							chooseDifOn = true;
+							
+							//storyModeOn = true;
+							//storyModeFunc = true;
+						}
+					}
+					
+					if (mainMenu.continueEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED)
+							System.out.println("Continue Clicked!");
+							if (mouseMov.isButtonPressed(Mouse.Button.LEFT)) {
+								s = new Save();
+								s.contGame();
+								storyModeOn = true;
+								storyModeFunc = true;
+								Pathing level = new Pathing(window,s);
+								level.run();
+								s.IncreaseLevel();
+								if(s.getCurrLvl()==1) count = 24;
+								if(s.getCurrLvl()==2) count = 36;
+								if(s.getCurrLvl()==3) count = 56;
+								if(s.getCurrLvl()==4) count = 70;
+							}
+					}
 						
-						//Creating a new save instance
-						Save s = new Save();
-						
-						//Creating new game, use the .contGame() method to continue instead
-						s.newGame("easy");
-						
-						//Creating the instance of the level
-						Pathing p = new Pathing(window, s);
-						p.run();
-						
-						//Method to save the game (level, round, difficulty) -- Done in pathing
-						s.saveFile(1,1,"medium");
+					if (mainMenu.quickPlayEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							mainMenuOn = false;
+							mainMenuFunc = false;
+							chooseLevOn = true;
+						}
+					}
+					
+					if (mainMenu.exitEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED)
+							alertScreenOn = true;	
 					}
 				}
-				else {rect[0].setRectColor(Color.TRANSPARENT, 0);}
+								
+				
+				//Story Mode Event
+				if (storyModeFunc) {	
+					for (int i=0; i<2; i++) {
+						if (storyMode.buttonsEvent(mouseLoc, i)) {						//New Code****
+							if (mouseMov.isButtonPressed(Mouse.Button.LEFT)) {
+								if (i == 0) {
+									count ++;
+									System.out.println("button pressed: " + count);
+									//chooseLevel = true;
+									scenesOn = true;
+									if(count==15)
+									{
+										scenesOn = false;
+										BGM.stop();
+										Pathing level1 = new Pathing(window,s);
+										level1.run();
+										s.IncreaseLevel();
+										s.saveFile(s.getCurrLvl(),s.getCurrRound(),s.getDiff());
+									}
+									else if(count==23)
+									{
+										scenesOn = false;
+										BGM.stop();
+										Pathing level1 = new Pathing(window,s);
+										level1.run();
+										s.IncreaseLevel();
+									}
+									else if(count==35)
+									{
+										scenesOn = false;
+										BGM.stop();
+										Pathing level1 = new Pathing(window,s);
+										level1.run();
+										s.IncreaseLevel();
+									}
+									else if(count==55)
+									{
+										scenesOn = false;
+										BGM.stop();
+										Pathing level1 = new Pathing(window,s);
+										level1.run();
+										s.IncreaseLevel();
+									}
+									else if(count == 69)
+									{
+										scenesOn = false;
+										BGM.stop();
+										Pathing level1 = new Pathing(window,s);
+										level1.run();
+										s.IncreaseLevel();
+										
+									}
+							
 
-				if (rect[1].detectPos(rect[1].getRectPosition(), rect[1].getRectDimensions(), mouseLoc))
-					rect[1].setRectColor(Color.GREEN, 40);
-				else {rect[1].setRectColor(Color.TRANSPARENT, 0);}
+								}
+								else {
+									alertScreenOn = true;
+									storyModeFunc = false;
+								}
+							}
+						}
+					}
+				}
+				
+				//Pop-up alert Event
+				if (alertScreenOn) {
+					mainMenuFunc = false;
+					storyModeFunc = false;
+					if (quitScreen.yesEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							alertScreenOn = false;
+							if (mainMenuOn)
+								window.close();
+							else {
+								mainMenuOn = true;
+								mainMenuFunc = true;
+								storyModeOn = false;
+								storyModeFunc = false;
+							}
+						}
+					}
 
-				if (rect[2].detectPos(rect[2].getRectPosition(), rect[2].getRectDimensions(), mouseLoc)) {
-					rect[2].setRectColor(Color.YELLOW, 40);
-					//if (mouseMov.isButtonPressed(Mouse.Button.LEFT))
-					if (event.type == Event.Type.MOUSE_BUTTON_RELEASED)
-						window.close();
-				}	
-				else {rect[2].setRectColor(Color.TRANSPARENT, 0);}
+					if (quitScreen.noEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							alertScreenOn = false;
+							if (mainMenuOn)
+								mainMenuFunc = true;
+							else if (storyModeOn)
+								storyModeFunc = true;
+						}
+					}
+				}
+				
+				if (chooseLevOn) {
+					for (int i=0; i<5; i++) {
+						if (chooseLevel.mapEvent(mouseLoc, i)) {
+							if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+								
+									Save quickSave = new Save();
+									quickSave.newGame("easy");
+									quickSave.setLevel(i+1);
+								
+									Pathing level = new Pathing(window,quickSave);
+									level.run();
+							}
+						}
+					}
+					if (chooseLevel.backButtonEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							chooseLevOn = false;
+							mainMenuOn = true;
+							mainMenuFunc = true;
+						}
+					}
+				}
+				
+				if (chooseDifOn) {
+					for (int i=0; i<3; i++) {
+						if (chooseDif.difficultiesEvent(mouseLoc, i)) {
+								if(mouseMov.isButtonPressed(Mouse.Button.LEFT))
+								{	
+									chooseDifOn = false;
+									storyModeOn = true;
+									storyModeFunc = true;
+										
+							
+									//Creating new game, use the .contGame() method to continue instead
+									s = new Save();
+									if(i==0) 	s.newGame("easy");
+									if(i==1) 	s.newGame("intermediate");
+									if(i==2) 	s.newGame("hard");
+								}
+								
+							
+						}
+					}
+					if (chooseDif.backButtonEvent(mouseLoc)) {
+						if (event.type == Event.Type.MOUSE_BUTTON_RELEASED) {
+							chooseDifOn = false;
+							mainMenuOn = true;
+							mainMenuFunc = true;
+						}
+					}
+				}
 			}
+			
+			window.display();
+
 		}
 	}
 

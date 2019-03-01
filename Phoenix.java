@@ -1,4 +1,12 @@
 import org.jsfml.graphics.*;
+/**
+* Constructor of Phoenix
+* @param xPixelsPerSecond The number of pixels the phoenix should move per second in the x direction
+* @param yPixelsPerSecond The number of pixels the phoenix should move per second in the y direction
+* @param r The rotation of the phoenix
+* @param diffculty The diffculty of the game
+* @param background The background the phoenix will be displayed on
+*/
 public class Phoenix extends NPC
 {
 	public Phoenix(float xPixelsPerSecond, float yPixelsPerSecond,int r,String diffculty, Background background)

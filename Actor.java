@@ -14,45 +14,33 @@ abstract class Actor {
 		boolean remove = false;
 
 		//
-		// Is point x, y within area occupied by this object?
-		//
-		// This should really be done with bounding boxes not points
-		//
-
-		boolean within (int x, int y) {
-			// Should check object bounds here
-			// -- we'd normally assume a simple rectangle
-			//    ...and override as necessary
-			return false;
-		}
-		//
 		// Work out where object should be for next frame
-		// THIS METHOD NEED TO BE MOVED DOWN
-		abstract void calcMove(int minx, int miny, int maxx, int maxy, float time);
-		
+		void calcMove(int minx, int miny, int maxx, int maxy, float time)
+		{
+			
+		}
+		/**
+		* Sets the position of the actor onscreen
+		* @param x The x position onscreen
+		* @param y The y position onscreen
+		*/
 		public void setLocation (Float x, Float y) {
 			this.x = x;
 			this.y = y;
 			setPosition.accept((float) x, (float) y);
 		}
-		//
-		// Reposition the object
-		//
+		/**
+		* Reposition the object
+		*/
 		void performMove( ) {
 			rotate.accept(r);
 			setPosition.accept(x, y);
 		}
-		
-		float getX()
-		{
-			return x;
-		}
-		
-		float getY()
-		{
-			return y;
-		}
-		//Tower Method
+		/**
+		* Determines whether the actor needs removing or not
+		* @param width The width of the screen
+		* @param height The height of the screen
+		*/
 		boolean needsRemoving(int width, int height) {
 			if(remove)
 				return true;
@@ -62,9 +50,10 @@ abstract class Actor {
 				return false;
 		}
 
-		//
-		// Render the object at its new position
-		//
+		/**
+		* Render the object at its new position
+		* @param w The window that the actors are drawn on
+		*/
 		void draw(RenderWindow w) {
 			w.draw(obj);
 		}

@@ -7,7 +7,13 @@ abstract class ImageActor extends Actor {
 		private Sprite img;
 		float scalingX;
 		float scalingY;
-
+		/**
+		* Constructor of ImageActor
+		* @param x The x position of the ImageActor object
+		* @param y The y position of the ImageActor objects
+		* @param r The rotation of ImageActor objects
+		* @param textureFile The file path to sprite
+		*/
 		public ImageActor(float x, float y, int r, String textureFile) {
 			//
 			// Load image/ texture
@@ -59,17 +65,26 @@ abstract class ImageActor extends Actor {
 			// Setting the new texture and updating the size of the sprite if necessary
 			img.setTexture(texture, true);
 		}
-		
+		/**
+		* Sets the value Dx to the parameter passed int
+		* @param newDx The new value of dx
+		*/
 		public void setDx(float newDx)
 		{
 			this.dx = newDx;
 		}
-		
+		/**
+		* Sets the value Dy to the parameter passed int
+		* @param newDy The new value of dy
+		*/
 		public void setDy(float newDy)
 		{
 			this.dy = newDy;
 		}
-		
+		/**
+		* Returns sprite object
+		* @return img The sprite of the ImageActor
+		*/
 		public Sprite getImg()
 		{
 			return img;
@@ -81,7 +96,7 @@ abstract class ImageActor extends Actor {
 			if(imgType ==1){
 					IntRect rect = new IntRect(left,0,32,32);
 					img.setTextureRect(rect);
-					img.setOrigin ( new Vector2f(16,height));
+					img.setOrigin ( new Vector2f(16,16));
 					
 			}else if(imgType == 2){
 					IntRect rect = new IntRect(left,0,128,138);
