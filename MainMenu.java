@@ -4,7 +4,15 @@
 //	Author: Jordan Young
 //
 
+//import java.io.File;
+//import java.io.IOException;
+//import java.nio.file.*;
+//import java.util.ArrayList;
+//import java.util.function.*;
+
 import org.jsfml.system.*;
+//import org.jsfml.window.*;
+//import org.jsfml.window.event.*;
 import org.jsfml.graphics.*;
 
 public class MainMenu {
@@ -12,13 +20,9 @@ public class MainMenu {
 	private static ImageAct wallpaperIMG;
 	private static GenButton rects[];
 	
-	/**
-	 * Constructor of the Main menu that 
-	 * initiate all needed object instances
-	**/
 	public MainMenu(){
-		wallpaperIMG = new ImageAct(ImageFile);	
-		rects = new GenButton[4];
+		wallpaperIMG = new ImageAct(ImageFile);							//Wallpaper
+		rects = new GenButton[4];										//Buttons detection rectangle
 		
 		rects[0] = new GenButton(369, 76, Color.MAGENTA, 0);
 		rects[1] = new GenButton(377, 73, Color.GREEN, 0);
@@ -30,16 +34,6 @@ public class MainMenu {
 		rects[3].setLocation((float) 19, (float) 19);
 	}
 	
-	/**
-	 * Update changes to the main menu screen when the boolean variable mainMenuOn is true and on the other hand return an
-	 * integer value of 0
-	 * 
-	 * @ param 		window the instance of RenderWindow class from jsfml that control all visualisation of the game window
-	 * @ param 		mainMenuOn the boolean variable that enable/ disable the update of the main menu visualisation
-	 * @ param 		count the integer variable that allow this method to return value to the same passed variable
-	 * @ return		Return an integer of value 0 to the count variable
-	 * 	 
-	**/
 	public int display(RenderWindow window, boolean mainMenuOn, int count) {
 		int countNumber = count;
 		
@@ -53,14 +47,6 @@ public class MainMenu {
 		return countNumber;
 	}
 	
-	/**
-	 * Detect whether the cursor position is on top of the object or no. If yes, then return true along with changing
-	 * object color. If no, then return false along with updating object color as transparent.
-	 * 
-	 * @ param 		mouseLoc the Vector2i variable from jsfml library that give real time cursor position update
-	 * @ return		Return a boolean variable to indicate detection of cursor on top of the object
-	 * 	 
-	**/
 	public boolean newGameEvent(Vector2i mouseLoc) {
 		boolean detected = false;
 		
@@ -72,15 +58,7 @@ public class MainMenu {
 
 		return detected;
 	}
-
-	/**
-	 * Detect whether the cursor position is on top of the object or no. If yes, then return true along with changing
-	 * object color. If no, then return false along with updating object color as transparent.
-	 * 
-	 * @ param 		mouseLoc the Vector2i variable from jsfml library that give real time cursor position update
-	 * @ return		Return a boolean variable to indicate detection of cursor on top of the object
-	 * 	 
-	**/
+	
 	public boolean continueEvent(Vector2i mouseLoc) {
 		boolean detected = false;
 		
@@ -93,14 +71,6 @@ public class MainMenu {
 		return detected;
 	}
 	
-	/**
-	 * Detect whether the cursor position is on top of the object or no. If yes, then return true along with changing
-	 * object color. If no, then return false along with updating object color as transparent.
-	 * 
-	 * @ param 		mouseLoc the Vector2i variable from jsfml library that give real time cursor position update
-	 * @ return		Return a boolean variable to indicate detection of cursor on top of the object
-	 * 	 
-	**/
 	public boolean quickPlayEvent(Vector2i mouseLoc) {
 		boolean detected = false;
 		
@@ -114,14 +84,6 @@ public class MainMenu {
 		return detected;
 	}
 	
-	/**
-	 * Detect whether the cursor position is on top of the object or no. If yes, then return true along with changing
-	 * object color. If no, then return false along with updating object color as transparent.
-	 * 
-	 * @ param 		mouseLoc the Vector2i variable from jsfml library that give real time cursor position update
-	 * @ return		Return a boolean variable to indicate detection of cursor on top of the object
-	 * 	 
-	**/
 	public boolean exitEvent(Vector2i mouseLoc) {
 		boolean detected = false;
 		if (rects[3].detectPos(rects[3].getRectPosition(), rects[3].getRectDimensions(), mouseLoc)) {
