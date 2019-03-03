@@ -90,39 +90,22 @@ abstract class ImageActor extends Actor {
 			return img;
 		}
 		
-		/**
-		* Animation method that changes the current view of the sprite's spritesheet
-		* @param left The left most point of the sprite to read given in pixels (int)
-		* @param height The total height of the sprite in pixels (int)
-		* @param imgType The type of sprite, used for different sizes of animation (1 for Enemies, 2 for Towers, 3 for Ships)
-		*/
 		public void anim(int left, int height, int imgType)
 		{	
-			//If enemy
+		
 			if(imgType ==1){
-					//Read the given coordinates of the sprite's spritesheet image
 					IntRect rect = new IntRect(left,0,32,32);
-					//Set the new sprite image to the sprite
 					img.setTextureRect(rect);
-					//Set the new origin (sprite centre) to the new sprite image
 					img.setOrigin ( new Vector2f(16,16));
-			
-			//Else if tower
+					
 			}else if(imgType == 2){
-					//Read the given coordinates of the sprite's spritesheet image
 					IntRect rect = new IntRect(left,0,128,138);
-					//Set the new sprite image to the sprite
 					img.setTextureRect(rect);
-					//Set the new origin (sprite centre) to the new sprite image
 					img.setOrigin ( new Vector2f(64,height));
-			
-			//Else if ship	
+				
 			}else if(imgType == 3){			
-					//Read the given coordinates of the sprite's spritesheet image
 					IntRect rect = new IntRect(left,0,48,465);
-					//Set the new sprite image to the sprite
 					img.setTextureRect(rect);
-					//Set the new origin (sprite centre) to the new sprite image
 					img.setOrigin ( new Vector2f(24,height));
 			
 			}
